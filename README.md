@@ -14,8 +14,7 @@ difficult to break.
   editor at `/admin/`
 - **Catalog:** exported from Zotero, transformed by a Python script at build
   time
-- **Hosting:** any static host. Cloudflare Pages is what the deployment notes
-  below assume.
+- **Hosting:** GitHub Pages, deployed automatically from the `main` branch
 
 ---
 
@@ -153,26 +152,18 @@ when the images themselves change.
 
 ## Deploying
 
-Nothing has been deployed yet. These are the steps.
+The public GitHub repository is the deployment source. Every push to `main`
+runs `.github/workflows/deploy-pages.yml`, which installs the pinned
+dependencies, builds and validates the site, and publishes `site/dist/` to
+GitHub Pages. A failed validation is not deployed.
 
-### 1. GitHub
+The repository is a project site, but the website's permanent address is the
+custom root domain in `site/astro.config.mjs`. Root-relative links are
+intentional. Configure the custom domain when DNS is moved; do not treat the
+temporary `/senanshaibaniculturalcenter.com/` project path as the production
+address.
 
-Create a repository and push. Commits are authored as the center, not an
-individual, via a repository-local git config.
-
-### 2. Cloudflare Pages
-
-Create a Pages project connected to the repository.
-
-| Setting | Value |
-|---|---|
-| Build command | `npm run build` |
-| Build output directory | `site/dist` |
-| Root directory | `site` |
-
-This gives a `*.pages.dev` URL. **Review the site there before touching DNS.**
-
-### 3. The web editor
+### The web editor
 
 `site/public/admin/config.yml` needs two edits before anyone can sign in:
 
@@ -184,7 +175,7 @@ Editors then sign in at `/admin/`. Every save is a git commit, so changes are
 attributable and revertible, and the content stays plain Markdown if the
 editor is ever removed.
 
-### 4. DNS — the part that needs care
+### DNS — the part that needs care
 
 **Read this before cancelling anything at WordPress.com.**
 
@@ -204,13 +195,14 @@ cancelling anything.
 
 Recommended order:
 
-1. Verify the site on its `pages.dev` URL
-2. Move DNS to Cloudflare, recreating these records exactly:
+1. Confirm that the GitHub Pages deployment workflow succeeds
+2. Move DNS to a provider you control, recreating these mail records exactly:
    - `MX  10  mx1.titan.email`
    - `MX  20  mx2.titan.email`
    - `TXT  "v=spf1 include:spf.titan.email include:_spf.wpcloud.com ~all"`
      (the `_spf.wpcloud.com` part can go once WordPress.com does)
-3. Point the apex and `www` at the Pages project
+3. Configure `senanshaibaniculturalcenter.org` as the repository's GitHub
+   Pages custom domain, then apply the DNS records GitHub displays
 4. Confirm mail still sends **and** receives
 5. Only then consider cancelling hosting — keeping the registration and
    mailbox until they have somewhere else to live
@@ -223,7 +215,8 @@ removing from it.
 
 `site.analyticsToken` in `config.ts` is empty, so no tracking script loads at
 all. Setting it to a Cloudflare Web Analytics token enables cookieless
-analytics that need no consent banner. Traffic figures are then read from the
+analytics that need no consent banner. Cloudflare Web Analytics can be used
+with a site hosted on GitHub Pages; traffic figures are read from the
 Cloudflare dashboard.
 
 ---
