@@ -1,0 +1,472 @@
+---
+import Base from '../../layouts/Base.astro';
+import { count, filterFacets, items, facets } from '../../lib/catalog';
+import { libraries } from '../../config';
+
+const cataloged = libraries.filter((l) => l.cataloged);
+const pending = libraries.filter((l) => !l.cataloged);
+// A no-JS fallback: enough of the collection to be useful and indexable,
+// with every record reachable by its own permanent page.
+const fallback = items.slice(0, 50);
+const libraryFacet = facets.libraries ?? [];
+---
+
+<Base
+  title="Catalog"
+  description={`Search ${count} cataloged holdings of the Senan Shaibani Cultural Center by title, author, subject, or OCLC number, in Arabic or in transliteration.`}
+  wide
+>
+  <div class="intro">
+    <h1>Catalog</h1>
+    <p class="lede">
+      {count.toLocaleString()} cataloged holdings, searchable by title, author,
+      publisher, subject, or OCLC number.
+    </p>
+    <p class="note">
+      Arabic and romanized forms are indexed together, so <em>sahafah</em> and
+      {' '}<span lang="ar">صحافة</span>{' '}return the same records. Currently
+      reflects the {cataloged.map((l) => l.name).join(', ')}; the
+      {' '}{pending.map((l) => l.name).join(' and the ')} are still being
+      cataloged.
+    </p>
+  </div>
+
+  <form class="controls" role="search" id="controls">
+    <div class="field field--search">
+      <label class="label" for="q">Search</label>
+      <input
+        type="search"
+        id="q"
+        name="q"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="Title, author, subject, OCLC…"
+      />
+    </div>
+
+    {
+      filterFacets.map((f) => (
+        <div class="field field--select">
+          <label class="label" for={f.key}>{f.label}</label>
+          <select id={f.key} name={f.key} data-facet={f.key}>
+            <option value="">All</option>
+            {f.values.map((v) => (
+              <option value={v.value}>{v.value} ({v.count})</option>
+            ))}
+          </select>
+        </div>
+      ))
+    }
+
+    <button type="button" id="reset" class="reset">Clear</button>
+  </form>
+
+  <div class="resultbar">
+    <p class="status" id="status" aria-live="polite" role="status">
+      Showing all {count.toLocaleString()} records.
+    </p>
+    <div class="field field--sort">
+      <label class="label" for="sort">Sort</label>
+      <select id="sort">
+        <option value="title">Title (A–Z)</option>
+        <option value="year-desc">Year (newest first)</option>
+        <option value="year-asc">Year (oldest first)</option>
+        <option value="shelf">Shelf location</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="rec-table" role="table" aria-label="Catalog records">
+    <div class="rec-row rec-row--head" role="row">
+      <span role="columnheader">Title</span>
+      <span role="columnheader">Author</span>
+      <span role="columnheader">Year</span>
+      <span role="columnheader">Location</span>
+    </div>
+    <div id="records" role="rowgroup">
+      {
+        fallback.map((item) => (
+          <a class="rec-row" href={`/catalog/${item.id}/`} role="row">
+            <span class="rec-cell rec-cell--title" role="cell">
+              {item.title ? <span>{item.title}</span> : <span lang="ar">{item.titleArabic}</span>}
+              {item.title && item.titleArabic && (
+                <span class="rec-cell__arabic" lang="ar">{item.titleArabic}</span>
+              )}
+            </span>
+            <span class="rec-cell rec-cell--author" role="cell">
+              <span class="rec-cell__label">Author</span>
+              {item.authors[0] ?? item.editors[0] ?? '—'}
+            </span>
+            <span class="rec-cell rec-cell--year" role="cell">
+              <span class="rec-cell__label">Year</span>
+              {item.year ?? '—'}
+            </span>
+            <span class="rec-cell rec-cell--loc" role="cell">
+              <span class="rec-cell__label">Location</span>
+              {item.location.display || '—'}
+            </span>
+          </a>
+        ))
+      }
+    </div>
+  </div>
+
+  <noscript>
+    <p class="note">
+      Showing the first {fallback.length} records. Searching and filtering
+      require JavaScript; every record also has its own page, and the complete
+      list is available as <a href="/catalog/index.json">JSON</a>.
+    </p>
+  </noscript>
+
+  <div class="more">
+    <button type="button" id="more" hidden>Show more</button>
+  </div>
+</Base>
+
+<script>
+  // Search runs entirely in the browser against a compact index. The heavy
+  // folding work -- diacritics, hamza forms, and the Arabic/Latin consonant
+  // bridge -- was done at build time; this only has to fold the query to
+  // match.
+  interface Row {
+    i: string; t: string; a: string; u: string;
+    y: number | null; l: string[]; r: number | null; c: string;
+    s: string; k: string;
+  }
+
+  const PAGE = 50;
+  const ARABIC = /[؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿]/;
+  const TASHKEEL = /[ً-ْٰـ]/g;
+  const ROMAN: Record<string, string> = {
+    ا:'a', ب:'b', ت:'t', ث:'th', ج:'j', ح:'h', خ:'kh', د:'d', ذ:'dh',
+    ر:'r', ز:'z', س:'s', ش:'sh', ص:'s', ض:'d', ط:'t', ظ:'z', ع:'',
+    غ:'gh', ف:'f', ق:'q', ك:'k', ل:'l', م:'m', ن:'n', ه:'h', و:'w',
+    ي:'y', ء:'', پ:'p', چ:'ch', ژ:'zh', گ:'g',
+  };
+
+  const foldArabic = (s: string) =>
+    s.replace(TASHKEEL, '')
+      .replace(/[آأإٱ]/g, 'ا')
+      .replace(/ى/g, 'ي').replace(/ة/g, 'ه')
+      .replace(/ؤ/g, 'و').replace(/ئ/g, 'ي');
+
+  const foldLatin = (s: string) =>
+    s.replace(/[ʿʾʻʼ‘’'`]/g, '')
+      .normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+
+  const romanize = (s: string) =>
+    [...foldArabic(s)].map((c) => (c in ROMAN ? ROMAN[c] : /\s/.test(c) ? c : ''))
+      .join('').replace(/\s+/g, ' ').trim();
+
+  const skeleton = (s: string) => s.replace(/[aeiou]/g, '');
+
+  const q = document.getElementById('q') as HTMLInputElement;
+  const sortSel = document.getElementById('sort') as HTMLSelectElement;
+  const statusEl = document.getElementById('status')!;
+  const list = document.getElementById('records')!;
+  const moreBtn = document.getElementById('more') as HTMLButtonElement;
+  const selects = [...document.querySelectorAll<HTMLSelectElement>('[data-facet]')];
+
+  let rows: Row[] = [];
+  let matches: Row[] = [];
+  let shown = 0;
+
+  const esc = (s: string) =>
+    s.replace(/[&<>"]/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' })[c]!);
+
+  function render(reset: boolean) {
+    if (reset) { list.innerHTML = ''; shown = 0; }
+    const slice = matches.slice(shown, shown + PAGE);
+    list.insertAdjacentHTML('beforeend', slice.map((r) => {
+      const title = r.t
+        ? `<span>${esc(r.t)}</span>`
+        : `<span lang="ar">${esc(r.a)}</span>`;
+      const parallel = r.t && r.a
+        ? `<span class="rec-cell__arabic" lang="ar">${esc(r.a)}</span>` : '';
+      return `<a class="rec-row" href="/catalog/${r.i}/" role="row">
+        <span class="rec-cell rec-cell--title" role="cell">${title}${parallel}</span>
+        <span class="rec-cell rec-cell--author" role="cell"><span class="rec-cell__label">Author</span>${esc(r.u || '—')}</span>
+        <span class="rec-cell rec-cell--year" role="cell"><span class="rec-cell__label">Year</span>${r.y ?? '—'}</span>
+        <span class="rec-cell rec-cell--loc" role="cell"><span class="rec-cell__label">Location</span>${esc(r.c || '—')}</span>
+      </a>`;
+    }).join(''));
+    shown += slice.length;
+    moreBtn.hidden = shown >= matches.length;
+    moreBtn.textContent = `Show more (${(matches.length - shown).toLocaleString()} remaining)`;
+  }
+
+  const collator = new Intl.Collator('en', { sensitivity: 'base', numeric: true });
+
+  function sortRows(list: Row[]) {
+    const mode = sortSel.value;
+    const titleOf = (r: Row) => r.t || r.a || '';
+    return [...list].sort((a, b) => {
+      if (mode === 'year-desc') return (b.y ?? -Infinity) - (a.y ?? -Infinity);
+      if (mode === 'year-asc') return (a.y ?? Infinity) - (b.y ?? Infinity);
+      if (mode === 'shelf') {
+        return (a.r ?? 999) - (b.r ?? 999) || collator.compare(a.c, b.c);
+      }
+      return collator.compare(titleOf(a), titleOf(b));
+    });
+  }
+
+  function apply() {
+    const raw = q.value.trim();
+    const filters = selects
+      .map((s) => [s.dataset.facet!, s.value] as const)
+      .filter(([, v]) => v);
+
+    let needles: string[] = [];
+    if (raw) {
+      needles = ARABIC.test(raw)
+        ? [foldArabic(raw), skeleton(romanize(raw))]
+        : [foldLatin(raw), skeleton(foldLatin(raw))];
+    }
+
+    matches = rows.filter((r) => {
+      for (const [key, value] of filters) {
+        if (key === 'languages' && !r.l.includes(value)) return false;
+        if (key === 'decades') {
+          if (!r.y || `${Math.floor(r.y / 10) * 10}s` !== value) return false;
+        }
+        if (key === 'ranges' && `Range ${r.r}` !== value) return false;
+      }
+      if (!needles.length) return true;
+      // Match the folded form first; fall back to the consonant skeleton,
+      // which is what lets a Latin query reach an Arabic-only record.
+      return r.s.includes(needles[0]) ||
+        (needles[1].length > 3 && r.k.includes(needles[1]));
+    });
+
+    matches = sortRows(matches);
+
+    statusEl.textContent = matches.length === rows.length
+      ? `Showing all ${rows.length.toLocaleString()} records.`
+      : `${matches.length.toLocaleString()} of ${rows.length.toLocaleString()} records.`;
+    render(true);
+  }
+
+  let timer: number;
+  const debounced = () => {
+    clearTimeout(timer);
+    timer = window.setTimeout(apply, 120);
+  };
+
+  fetch('/catalog/index.json')
+    .then((r) => r.json())
+    .then((data: Row[]) => {
+      rows = data;
+      // Deep links from elsewhere on the site, e.g. ?q=journalism
+      const params = new URLSearchParams(location.search);
+      if (params.get('q')) q.value = params.get('q')!;
+      for (const s of selects) {
+        const v = params.get(s.dataset.facet!);
+        if (v) s.value = v;
+      }
+      apply();
+      q.addEventListener('input', debounced);
+      sortSel.addEventListener('change', apply);
+      selects.forEach((s) => s.addEventListener('change', apply));
+      moreBtn.addEventListener('click', () => render(false));
+      document.getElementById('reset')!.addEventListener('click', () => {
+        q.value = '';
+        selects.forEach((s) => (s.value = ''));
+        apply();
+      });
+      document.getElementById('controls')!
+        .addEventListener('submit', (e) => e.preventDefault());
+    })
+    .catch(() => {
+      statusEl.textContent =
+        'The catalog index could not be loaded. Records remain available individually.';
+    });
+</script>
+
+<style>
+  .intro { width: min(100%, var(--measure)); margin-bottom: 2.5rem; }
+
+  .note {
+    font-size: 0.92rem;
+    color: var(--ink-muted);
+    margin-bottom: 0;
+  }
+
+  .controls {
+    display: grid;
+    gap: 1rem 1.5rem;
+    grid-template-columns: 1fr;
+    align-items: end;
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  @media (min-width: 48rem) {
+    .controls {
+      grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr)) auto;
+    }
+  }
+
+  .field { display: grid; gap: 0.35rem; }
+
+  input[type='search'],
+  select {
+    font: inherit;
+    font-size: 1rem;
+    color: var(--ink);
+    background: var(--paper);
+    border: 0;
+    border-bottom: 1px solid var(--rule);
+    padding: 0.4rem 0;
+    width: 100%;
+    border-radius: 0;
+  }
+
+  input[type='search']:focus,
+  select:focus { outline: none; border-bottom-color: var(--accent); }
+
+  select { appearance: none; padding-right: 1.2rem; }
+
+  .field--select, .field--sort { position: relative; }
+
+  .field--select::after,
+  .field--sort::after {
+    content: '';
+    position: absolute;
+    right: 2px;
+    bottom: 0.85rem;
+    width: 0.4rem;
+    height: 0.4rem;
+    border-right: 1px solid var(--ink-muted);
+    border-bottom: 1px solid var(--ink-muted);
+    transform: rotate(45deg);
+    pointer-events: none;
+  }
+
+  .reset {
+    font: inherit;
+    font-size: 0.9rem;
+    background: none;
+    border: 0;
+    border-bottom: 1px solid transparent;
+    color: var(--ink-muted);
+    cursor: pointer;
+    padding: 0.4rem 0;
+  }
+
+  .reset:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .resultbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem 2rem;
+    align-items: end;
+    justify-content: space-between;
+    margin: 1.2rem 0 0.4rem;
+  }
+
+  .status { font-size: 0.86rem; color: var(--ink-muted); margin: 0 0 0.4rem; }
+  .field--sort { min-width: 12rem; }
+
+  .more { padding-top: 2rem; }
+
+  #more {
+    font: inherit;
+    font-size: 0.95rem;
+    background: none;
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    padding: 0.6rem 1.4rem;
+    cursor: pointer;
+  }
+
+  #more:hover { border-color: var(--accent); color: var(--accent); }
+</style>
+
+<!-- Rows are re-rendered client-side and so never carry Astro's scoping
+     attribute; these rules must not be scoped. -->
+<style is:global>
+  /* --- the record table ---------------------------------------------------
+     One record per row, four aligned columns, ruled like a printed finding
+     aid. Collapses to stacked label/value pairs on narrow screens. */
+
+  .rec-table { margin-top: 0.6rem; }
+
+  .rec-row {
+    display: grid;
+    gap: 0.15rem 1.5rem;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--rule-soft);
+    text-decoration: none;
+    color: inherit;
+    align-items: baseline;
+  }
+
+  @media (min-width: 56rem) {
+    .rec-row {
+      grid-template-columns:
+        minmax(0, 2.6fr) minmax(0, 1.15fr) 4.5rem minmax(0, 0.95fr);
+      gap: 1.5rem;
+    }
+  }
+
+  .rec-row--head {
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 0.5rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  @media (max-width: 55.99rem) {
+    .rec-row--head { display: none; }
+  }
+
+  a.rec-row:hover { background: var(--paper-sunk); }
+  a.rec-row:hover .rec-cell--title > span:first-child { color: var(--accent); }
+
+  .rec-cell { min-width: 0; }
+
+  .rec-cell--title {
+    display: grid;
+    gap: 0.15rem;
+    font-size: 1.02rem;
+    line-height: 1.35;
+    text-wrap: pretty;
+  }
+
+  .rec-cell__arabic {
+    font-size: 1rem;
+    /* Right-to-left text aligns right by default, which strands the Arabic
+       at the far edge of a wide column, away from the title it belongs to.
+       The reading order stays RTL; only the block is flushed left so a
+       record scans as one unit. */
+    text-align: left;
+  }
+
+  .rec-cell--author, .rec-cell--year, .rec-cell--loc {
+    font-size: 0.88rem;
+    color: var(--ink-muted);
+  }
+
+  .rec-cell--year { font-variant-numeric: tabular-nums; }
+
+  /* Column headers disappear on narrow screens, so each value carries its
+     own label there instead. */
+  .rec-cell__label {
+    display: none;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-right: 0.5rem;
+    opacity: 0.75;
+  }
+
+  @media (max-width: 55.99rem) {
+    .rec-cell__label { display: inline; }
+    .rec-row { padding: 1rem 0; }
+    .rec-cell--author, .rec-cell--year, .rec-cell--loc { margin-top: 0.1rem; }
+  }
+</style>

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!--
+    A provisional mark: the initial set in the site's own text face, over the
+    paper ground. Typographic rather than emblematic, per the brief. Adapts to
+    dark mode so it does not sit in a bright square on a dark tab strip.
+  -->
+  <style>
+    .ground { fill: #faf8f3; }
+    .letter { fill: #7b3f2e; }
+    @media (prefers-color-scheme: dark) {
+      .ground { fill: #14120e; }
+      .letter { fill: #cd9070; }
+    }
+  </style>
+  <rect class="ground" width="32" height="32" />
+  <text
+    class="letter"
+    x="16"
+    y="23.5"
+    text-anchor="middle"
+    font-family="EB Garamond, Iowan Old Style, Palatino, Georgia, serif"
+    font-size="24"
+  >S</text>
+</svg>

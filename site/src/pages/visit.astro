@@ -1,0 +1,73 @@
+---
+import Base from '../layouts/Base.astro';
+import Figure from '../components/Figure.astro';
+import { site } from '../config';
+---
+
+<Base
+  title="Visit"
+  description={`How to arrange access to the collections at the Senan Shaibani Cultural Center in ${site.location}.`}
+>
+  <h1>Visit</h1>
+
+  <p class="lede">
+    The collections are consultable on site by arrangement. There is no
+    lending; material is used in the reading room.
+  </p>
+
+  <Figure
+    src="/img/stone-marker.jpg"
+    alt="A carved limestone marker outside the center reading Senan Shaibani Cultural Center, Established 2025."
+    caption="The center, forty-five miles east of Austin."
+    width={1400}
+    height={787}
+    loading="eager"
+  />
+
+  <h2>Arranging a visit</h2>
+
+  <p>
+    Write to <a href={`mailto:${site.email}`}>{site.email}</a> with an outline
+    of what you are looking for and roughly when you would like to come. If you
+    already have catalog records in mind, sending the record links helps us
+    have the material ready.
+  </p>
+
+  <h2>Location</h2>
+
+  <p>
+    {site.location} — forty-five miles east of Austin, forty-five miles west
+    of College Station, and about a hundred and ten miles northwest of
+    Houston. Full directions are sent when a visit is confirmed.
+  </p>
+
+
+  <h2>Citing the collections</h2>
+
+  <p>
+    Each catalog record carries a suggested citation. The general form is:
+  </p>
+
+  <p class="citation">
+    Creator. “Title/Description.” Date. {site.name}, Library Name, Location.
+  </p>
+
+  <h2>Contributing</h2>
+
+  <p>
+    The center welcomes corrections to catalog records, and enquiries about
+    donations of material in Middle Eastern studies. Write to{' '}<a href={`mailto:${site.email}`}>{site.email}</a>.
+  </p>
+</Base>
+
+<style>
+  h2 { margin-top: 2.5em; }
+
+  .citation {
+    font-size: 0.95rem;
+    color: var(--ink-muted);
+    border-left: 1px solid var(--rule);
+    padding-left: 1.2rem;
+    margin-left: 0;
+  }
+</style>

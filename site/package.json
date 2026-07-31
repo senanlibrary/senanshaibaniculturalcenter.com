@@ -1,0 +1,23 @@
+{
+  "name": "senan-site",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "catalog": "python3 ../tools/build_catalog.py ../data/zotero-export-rifat-al-said.csv ../data/catalog.json",
+    "dev": "npm run catalog && astro dev",
+    "build": "npm run catalog && astro build && npm run check",
+    "preview": "astro preview",
+    "astro": "astro",
+    "check": "python3 ../tools/check_build.py"
+  },
+  "dependencies": {
+    "astro": "^7.1.6"
+  },
+  "devDependencies": {
+    "@astrojs/sitemap": "^3.7.3"
+  },
+  "private": true
+}

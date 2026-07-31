@@ -1,0 +1,85 @@
+---
+import Base from '../../layouts/Base.astro';
+import { guides } from '../../config';
+---
+
+<Base
+  title="Guides"
+  description="Written introductions to particular strengths of the collection, with selected titles and their shelf locations."
+  wide
+>
+  <div class="head">
+    <h1>Guides</h1>
+    <p class="lede">
+      Written introductions to particular strengths of the collection. Each
+      guide describes selected titles, why they matter, and where to find them
+      on the shelf.
+    </p>
+    <p class="note">
+      Guides are written by the center's catalogers as material is processed,
+      and are added to over time. For everything cataloged to date, search
+      the{' '}<a href="/catalog/">catalog</a>.
+    </p>
+  </div>
+
+  <ul class="guides">
+    {
+      guides.map((guide) => (
+        <li>
+          <a href={`/guides/${guide.slug}/`}>
+            <h2>{guide.title}</h2>
+            <p>{guide.blurb}</p>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</Base>
+
+<style>
+  .head { width: min(100%, var(--measure)); }
+  .head h1 { margin-bottom: 1rem; }
+
+  .note {
+    font-size: 0.92rem;
+    color: var(--ink-muted);
+    margin-top: 1rem;
+  }
+
+  .guides {
+    list-style: none;
+    margin: 3rem 0 0;
+    padding: 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .guides li { border-bottom: 1px solid var(--rule-soft); }
+
+  .guides a {
+    display: grid;
+    gap: 0.35rem 2.5rem;
+    padding: 1.6rem 0;
+    text-decoration: none;
+  }
+
+  @media (min-width: 44rem) {
+    .guides a { grid-template-columns: minmax(0, 20rem) minmax(0, 1fr); }
+  }
+
+  .guides h2 {
+    font-size: 1.14rem;
+    margin: 0;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent);
+    text-underline-offset: 0.18em;
+  }
+
+  .guides a:hover h2 { color: var(--accent); text-decoration-color: var(--accent); }
+
+  .guides p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--ink-muted);
+    max-width: 40rem;
+  }
+</style>

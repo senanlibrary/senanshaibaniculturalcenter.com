@@ -1,0 +1,116 @@
+---
+import Base from '../layouts/Base.astro';
+import Figure from '../components/Figure.astro';
+import { site, libraries } from '../config';
+import { count } from '../lib/catalog';
+---
+
+<Base
+  title="About"
+  description={`The Senan Shaibani Cultural Center is a research collection in Middle Eastern studies in ${site.location}.`}
+>
+  <h1>About the center</h1>
+
+  <p class="lede">
+    The Senan Shaibani Cultural Center is a working research collection in
+    Middle Eastern studies, assembled from several scholarly libraries and
+    held at a single site in {site.location}, forty-five miles east of Austin.
+  </p>
+
+  <p>
+    The center exists to keep a body of material available to the people who
+    need it. Much of what it holds — Arabic-language periodicals from the
+    1950s and 1960s, Arab American diaspora publications, runs of journals
+    that ceased decades ago — survives in few other places in the United
+    States, and in some cases nowhere else. Making it findable is the whole of
+    the work.
+  </p>
+
+  <p>
+    Holdings are consultable on site by arrangement. The catalog is public,
+    and currently describes {count.toLocaleString()} items; cataloging of the
+    remaining collections is ongoing.
+  </p>
+
+  <h2>Senan Shaibani</h2>
+
+  <Figure
+    src="/img/senan.jpg"
+    alt="Senan Shaibani, a young bearded man, smiling in front of a flowering bougainvillea."
+    caption="Senan Shaibani."
+    portrait
+    width={620}
+    height={887}
+  />
+
+  <p>
+    Senan Shaibani devoted his life to education and cultural dialogue. His
+    studies in Middle Eastern thought and his dedication to human rights
+    shaped a vision of knowledge as both a right and a responsibility.
+    Through his writing, teaching, and activism, Senan inspired those around
+    him to see learning as a shared pursuit. This center continues his legacy
+    by creating a space where ideas can meet, traditions can be explored, and
+    new understanding can emerge.
+  </p>
+
+  <!--
+    EDITORIAL NOTE — not published, remove once filled in.
+
+    This section still needs real biography written by the family: dates,
+    education, work, and what he read and collected. The migration source
+    contained a single sentence.
+
+    A page of substance here is what keeps the rest of the site scholarly —
+    the commemorative weight of the project belongs on this page and not
+    distributed through the catalog or the collections.
+
+    If the Marcel Khalife dedication is to be mentioned, it belongs here, as a
+    sentence of biography rather than as embedded video.
+  -->
+
+  <h2>The collections</h2>
+
+  <p>
+    The center's holdings come from three named collections, each reflecting
+    the working library of the scholars who assembled it.
+  </p>
+
+  <dl class="libraries">
+    {
+      libraries.map((library) => (
+        <div>
+          <dt>{library.name}</dt>
+          <dd>{library.summary}</dd>
+        </div>
+      ))
+    }
+  </dl>
+
+  <h2>Cataloging</h2>
+
+  <p>
+    Records are created in Zotero against WorldCat, following a
+    minimal-processing approach that preserves original order where possible.
+    Each record carries shelf-level location, and Arabic titles are recorded in
+    both Arabic script and romanized form where both are known.
+  </p>
+
+  <p>
+    Descriptive records are published under a{' '}<a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a>{' '}license and may be reused with attribution. The physical holdings they
+    describe may remain in copyright.
+  </p>
+
+  <p>
+    The catalog is a work in progress and is corrected continually.
+    Corrections and additions are welcome at{' '}<a href={`mailto:${site.email}`}>{site.email}</a>.
+  </p>
+</Base>
+
+<style>
+  h2 { margin-top: 2.5em; }
+
+  .libraries { margin: 1.5rem 0 0; }
+  .libraries div + div { margin-top: 1.4rem; }
+  .libraries dt { font-size: 1.06rem; margin-bottom: 0.2rem; }
+  .libraries dd { margin: 0; color: var(--ink-muted); }
+</style>

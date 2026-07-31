@@ -1,0 +1,56 @@
+# Sveltia CMS configuration.
+#
+# SETUP REQUIRED before this will work — see the Deploying section of README.md:
+#   1. Replace OWNER/REPO below with the new GitHub account and repository.
+#   2. Register a GitHub OAuth app and point base_url at the auth worker.
+# Until then the editor will load but will not be able to sign in.
+
+backend:
+  name: github
+  repo: OWNER/REPO
+  branch: main
+  # Sveltia's hosted OAuth relay. Replace with your own worker if you would
+  # rather not depend on a third party for sign-in.
+  base_url: https://sveltia-cms-auth.sveltia.workers.dev
+
+# Editors upload images here; the site serves them from /img/.
+media_folder: site/public/img
+public_folder: /img
+
+publish_mode: simple
+
+collections:
+  - name: pages
+    label: Subject guides and pages
+    label_singular: Page
+    folder: content/pages
+    create: true
+    slug: '{{fields.slug}}'
+    extension: md
+    format: frontmatter
+    identifier_field: title
+    summary: '{{title}}'
+    fields:
+      - { name: title, label: Title, widget: string }
+      - {
+          name: slug,
+          label: URL slug,
+          widget: string,
+          hint: 'Lowercase words separated by hyphens. Changing this changes the page address and breaks existing links.',
+        }
+      - {
+          name: body,
+          label: Content,
+          widget: markdown,
+          hint: 'Arabic text can be pasted directly; it is typeset right-to-left automatically.',
+        }
+      # Carried through from the WordPress migration so old addresses stay
+      # traceable. Editors do not normally need to touch these.
+      - { name: legacyUrl, label: Original WordPress URL, widget: string, required: false }
+      - {
+          name: legacyShortcodes,
+          label: Legacy shortcodes,
+          widget: list,
+          required: false,
+          hint: 'Read-only record of WordPress plugin embeds that were replaced.',
+        }

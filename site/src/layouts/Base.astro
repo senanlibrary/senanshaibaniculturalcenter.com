@@ -1,0 +1,349 @@
+---
+import '../styles/global.css';
+import { site, nav, guides } from '../config';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Wide pages (the catalog) opt out of the prose measure. */
+  wide?: boolean;
+}
+
+const { title, description = site.tagline, wide = false } = Astro.props;
+const fullTitle = title ? `${title} — ${site.name}` : site.name;
+const path = Astro.url.pathname;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={new URL(path, site.url)} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    {
+      site.analyticsToken && (
+        <script
+          defer
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon={`{"token": "${site.analyticsToken}"}`}
+        />
+      )
+    }
+    <!-- Preload only the regular Latin face; the rest can swap in. -->
+    <link
+      rel="preload"
+      href="/fonts/ebgaramond-latin-400-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+
+    <header class="masthead">
+      <div class="shell masthead__inner">
+        <a class="masthead__mark" href="/">
+          <span class="masthead__name">{site.name}</span>
+          <span class="masthead__sub">{site.location}</span>
+        </a>
+        <nav aria-label="Primary">
+          <ul class="nav">
+            {
+              nav.map((item) => (
+                <li class={'children' in item ? 'nav__item nav__item--has-menu' : 'nav__item'}>
+                  <a
+                    href={item.href}
+                    aria-current={path.startsWith(item.href) ? 'page' : undefined}
+                  >
+                    {item.label}
+                  </a>
+                  {'children' in item && (
+                    <>
+                      <button
+                        type="button"
+                        class="nav__toggle"
+                        aria-expanded="false"
+                        aria-controls="menu-collections"
+                        aria-label={`Show ${item.label} sections`}
+                      >
+                        <span class="nav__chevron" aria-hidden="true" />
+                      </button>
+                      <ul class="nav__menu" id="menu-collections" hidden>
+                        {item.children.map((child) => (
+                          <li>
+                            <a href={child.href}>{child.label}</a>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="shell">
+      <div class={wide ? '' : 'prose'}>
+        <slot />
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="shell footer__inner">
+        <div>
+          <p class="footer__name">{site.name}</p>
+          <p class="footer__meta">{site.location}</p>
+          <p class="footer__meta">
+            <a href={`mailto:${site.email}`}>{site.email}</a>
+          </p>
+        </div>
+
+        <nav class="footer__nav" aria-label="Footer">
+          <h2 class="label">Browse</h2>
+          <ul>
+            {nav.map((item) => (
+              <li>
+                <a href={item.href}>{item.label}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <nav class="footer__nav" aria-label="Subject guides">
+          <h2 class="label">Subject guides</h2>
+          <ul>
+            {guides.map((guide) => (
+              <li>
+                <a href={`/guides/${guide.slug}/`}>{guide.title}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <div class="footer__rights">
+          <p class="footer__meta">
+            Descriptive records are shared under a{' '}<a href="https://creativecommons.org/licenses/by/4.0/" rel="license noopener">CC BY 4.0</a>{' '}license. Individual holdings may remain in copyright.
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <style>
+      .masthead {
+        border-bottom: 1px solid var(--rule);
+        padding: 1.6rem 0;
+        margin-bottom: clamp(2.5rem, 6vw, 4.5rem);
+      }
+
+      .masthead__inner {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem 2rem;
+        align-items: baseline;
+        justify-content: space-between;
+      }
+
+      .masthead__mark {
+        text-decoration: none;
+        display: grid;
+        gap: 0.15rem;
+      }
+
+      .masthead__name {
+        font-size: 1.22rem;
+        letter-spacing: 0.005em;
+      }
+
+      .masthead__sub {
+        font-size: 0.74rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+      }
+
+      nav ul {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.6rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        font-size: 0.98rem;
+      }
+
+      nav a {
+        text-decoration: none;
+        padding-bottom: 2px;
+        border-bottom: 1px solid transparent;
+      }
+
+      nav a:hover { border-bottom-color: var(--accent); color: var(--accent); }
+      nav a[aria-current='page'] { border-bottom-color: var(--ink); }
+
+      main { padding-bottom: clamp(4rem, 10vw, 7rem); }
+
+      .footer {
+        border-top: 1px solid var(--rule);
+        padding: 2.5rem 0 3.5rem;
+        background: var(--paper-sunk);
+      }
+
+      .footer__inner {
+        display: grid;
+        gap: 1.6rem;
+        grid-template-columns: 1fr;
+      }
+
+
+
+      .nav { position: relative; }
+
+      .nav__item { position: relative; display: flex; align-items: baseline; gap: 0.25rem; }
+
+      .nav__toggle {
+        background: none;
+        border: 0;
+        padding: 0.15rem 0.1rem;
+        cursor: pointer;
+        color: var(--ink-muted);
+        display: inline-flex;
+        align-items: center;
+      }
+
+      .nav__chevron {
+        width: 0.36rem;
+        height: 0.36rem;
+        border-right: 1px solid currentColor;
+        border-bottom: 1px solid currentColor;
+        transform: rotate(45deg) translate(-1px, -1px);
+      }
+
+      .nav__toggle[aria-expanded='true'] { color: var(--accent); }
+
+      .nav__menu {
+        position: absolute;
+        top: calc(100% + 0.9rem);
+        left: -0.9rem;
+        z-index: 20;
+        min-width: 15rem;
+        display: grid;
+        gap: 0.1rem;
+        margin: 0;
+        padding: 0.7rem 0;
+        list-style: none;
+        background: var(--paper);
+        border: 1px solid var(--rule);
+        box-shadow: 0 6px 24px rgb(0 0 0 / 0.08);
+      }
+
+      /* The menu is offset below the link for breathing room, which leaves a
+         dead strip the pointer has to cross. This bridges it: an invisible
+         extension of the menu itself, so travelling from link to menu never
+         leaves the item and never triggers mouseleave. */
+      .nav__menu::before {
+        content: '';
+        position: absolute;
+        inset: -1rem 0 auto 0;
+        height: 1rem;
+      }
+
+      .nav__menu[hidden] { display: none; }
+
+      .nav__menu a {
+        display: block;
+        padding: 0.35rem 1.1rem;
+        font-size: 0.94rem;
+        border: 0;
+      }
+
+      .nav__menu a:hover { background: var(--paper-sunk); color: var(--accent); }
+
+      @media (min-width: 46rem) {
+        .footer__inner {
+          grid-template-columns: minmax(0, 1.1fr) auto auto minmax(0, 1fr);
+          gap: 2.5rem;
+        }
+      }
+
+      .footer__nav ul {
+        list-style: none;
+        margin: 0.6rem 0 0;
+        padding: 0;
+        display: grid;
+        gap: 0.35rem;
+      }
+
+      .footer__nav a { font-size: 0.9rem; text-decoration: none; }
+      .footer__nav a:hover { color: var(--accent); }
+      .footer__nav h2 { margin: 0; font-weight: inherit; }
+
+      .footer p { margin: 0 0 0.3rem; }
+      .footer__name { font-size: 1.02rem; }
+      .footer__meta { font-size: 0.88rem; color: var(--ink-muted); }
+      .footer__rights { font-size: 0.88rem; }
+    </style>
+
+    <script>
+      // Progressive enhancement: without JavaScript the Collections page
+      // itself still lists every guide, so the menu is a shortcut rather
+      // than the only route.
+      const item = document.querySelector('.nav__item--has-menu');
+      const toggle = item?.querySelector('.nav__toggle') as HTMLButtonElement | null;
+      const menu = item?.querySelector('.nav__menu') as HTMLElement | null;
+
+      if (toggle && menu) {
+        const setOpen = (open: boolean) => {
+          toggle.setAttribute('aria-expanded', String(open));
+          menu.hidden = !open;
+        };
+
+        toggle.addEventListener('click', () => {
+          setOpen(toggle.getAttribute('aria-expanded') !== 'true');
+        });
+
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+            setOpen(false);
+            toggle.focus();
+          }
+        });
+
+        document.addEventListener('click', (e) => {
+          if (!item!.contains(e.target as Node)) setOpen(false);
+        });
+
+        // Pointer users get it on hover; keyboard users on focus. Closing is
+        // delayed so a diagonal move toward the menu, which briefly leaves
+        // the item, does not shut it in the reader's face.
+        let closeTimer: number;
+        const cancelClose = () => clearTimeout(closeTimer);
+        const closeSoon = () => {
+          cancelClose();
+          closeTimer = window.setTimeout(() => setOpen(false), 220);
+        };
+
+        item!.addEventListener('mouseenter', () => {
+          cancelClose();
+          setOpen(true);
+        });
+        item!.addEventListener('mouseleave', closeSoon);
+        // A click on the toggle should hold the menu open regardless.
+        toggle.addEventListener('click', cancelClose);
+
+        item!.addEventListener('focusout', (e) => {
+          if (!item!.contains(e.relatedTarget as Node)) setOpen(false);
+        });
+      }
+    </script>
+  </body>
+</html>

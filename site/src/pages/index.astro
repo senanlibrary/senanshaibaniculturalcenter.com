@@ -1,0 +1,143 @@
+---
+import Base from '../layouts/Base.astro';
+import Figure from '../components/Figure.astro';
+import { count } from '../lib/catalog';
+import { libraries, site, guides } from '../config';
+---
+
+<Base
+  description={`A research collection in Middle Eastern studies in ${site.location}, holding Arabic and English books, periodicals, and archival material.`}
+  wide
+>
+  <section class="opening">
+    <h1>A research collection in Middle&nbsp;Eastern studies.</h1>
+    <p class="lede">
+      The center holds more than 20,000 books, journals, and newspapers in
+      Arabic and English — rare periodicals, Arab American diaspora
+      publications, and archival material, much of it held nowhere else in the
+      United States. Materials are consultable on site.
+    </p>
+    <p class="opening__actions">
+      <a class="action" href="/catalog/">Search the catalog</a>
+      <span class="opening__count">{count.toLocaleString()} records available</span>
+    </p>
+  </section>
+
+  <Figure
+    src="/img/reading-room.jpg"
+    alt="The reading room: walls of shelved books in dark wood cases, a leather sofa and chairs on a patterned carpet, and a bronze portrait bust on an inscribed plinth at the left."
+    caption="The reading room in Lincoln, Texas."
+    hero
+    width={2000}
+    height={1124}
+    loading="eager"
+  />
+
+  <section class="collections" aria-labelledby="collections-heading">
+    <h2 class="label" id="collections-heading">The collections</h2>
+    <ul>
+      {
+        libraries.map((library) => (
+          <li>
+            <h3>{library.name}</h3>
+            <p>{library.summary}</p>
+            <p class="collections__status">
+              {library.cataloged
+                ? 'Catalogd and searchable'
+                : 'Cataloging in progress'}
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="guides" aria-labelledby="guides-heading">
+    <h2 class="label" id="guides-heading">Subject guides</h2>
+    <ul>
+      {
+        guides.map((guide) => (
+          <li>
+            <a href={`/guides/${guide.slug}/`}>{guide.title}</a>
+            <span>{guide.blurb}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .opening {
+    width: min(100%, 46rem);
+    padding-bottom: clamp(3rem, 8vw, 5rem);
+  }
+
+  .opening h1 {
+    font-size: var(--step-3);
+    margin: 0.5rem 0 1rem;
+  }
+
+  .opening .lede { color: var(--ink-muted); }
+
+  .opening__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.6rem 1.2rem;
+    margin: 2rem 0 0;
+  }
+
+  .action {
+    text-decoration: none;
+    border: 1px solid var(--rule);
+    padding: 0.6rem 1.4rem;
+    font-size: 1rem;
+  }
+
+  .action:hover { border-color: var(--accent); color: var(--accent); }
+
+  .opening__count { font-size: 0.86rem; color: var(--ink-muted); }
+
+  section + section {
+    border-top: 1px solid var(--rule);
+    padding-top: 2.5rem;
+    padding-bottom: clamp(2.5rem, 6vw, 4rem);
+  }
+
+  .collections ul,
+  .guides ul {
+    list-style: none;
+    margin: 1.5rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 2rem 3rem;
+  }
+
+  @media (min-width: 52rem) {
+    .collections ul { grid-template-columns: repeat(3, 1fr); }
+    .guides ul { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .collections h3 {
+    font-size: 1.12rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .collections p {
+    margin: 0 0 0.5rem;
+    font-size: 0.95rem;
+    color: var(--ink-muted);
+  }
+
+  .collections__status {
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .guides li { display: grid; gap: 0.3rem; }
+  .guides a { font-size: 1.06rem; text-decoration: none; }
+  .guides a:hover { color: var(--accent); }
+  .guides span { font-size: 0.9rem; color: var(--ink-muted); }
+</style>

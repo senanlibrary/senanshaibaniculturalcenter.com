@@ -1,0 +1,189 @@
+---
+import Base from '../../layouts/Base.astro';
+import {
+  items,
+  displayTitle,
+  citation,
+  isArabicDominant,
+  type Item,
+} from '../../lib/catalog';
+import { site } from '../../config';
+
+export async function getStaticPaths() {
+  // One permanent page per holding. These are what a researcher cites and
+  // what a search engine indexes, so they exist as real HTML rather than
+  // living only inside the browse interface.
+  return items.map((item) => ({ params: { id: item.id }, props: { item } }));
+}
+
+interface Props { item: Item }
+const { item } = Astro.props;
+
+const fields: [string, string | null][] = [
+  ['Author', item.authors.join('; ') || null],
+  ['Editor', item.editors.join('; ') || null],
+  ['Contributor', item.contributors.join('; ') || null],
+  ['Published', [item.place, item.publisher, item.date].filter(Boolean).join(': ') || null],
+  ['Series', item.series || null],
+  ['Extent', item.pages || null],
+  ['Language', item.languages.join(', ') || null],
+  ['ISBN', item.isbn || null],
+  ['ISSN', item.issn || null],
+];
+
+const worldcat = item.oclc ? `https://search.worldcat.org/oclc/${item.oclc}` : null;
+const cite = citation(item, site.name);
+---
+
+<Base
+  title={displayTitle(item)}
+  description={[displayTitle(item), item.authors[0], item.date]
+    .filter(Boolean)
+    .join('. ')}
+>
+  <nav class="crumb" aria-label="Breadcrumb">
+    <a href="/catalog/">Catalog</a>
+  </nav>
+
+  <article>
+    <header class="head">
+      {item.title && <h1>{item.title}</h1>}
+      {
+        item.titleArabic && (
+          <p class={item.title ? 'head__parallel' : 'head__sole'} lang="ar">
+            {item.titleArabic}
+          </p>
+        )
+      }
+    </header>
+
+    <dl class="fields">
+      {
+        fields.filter(([, v]) => v).map(([k, v]) => (
+          <div class="fields__row">
+            <dt class="label">{k}</dt>
+            <dd lang={isArabicDominant(v!) ? 'ar' : undefined}>{v}</dd>
+          </div>
+        ))
+      }
+      <div class="fields__row">
+        <dt class="label">Location</dt>
+        <dd>{item.library}{item.location.display && ` — ${item.location.display}`}</dd>
+      </div>
+      {
+        worldcat && (
+          <div class="fields__row">
+            <dt class="label">OCLC</dt>
+            <dd>
+              <a href={worldcat} rel="noopener">{item.oclc}</a>
+            </dd>
+          </div>
+        )
+      }
+    </dl>
+
+    {
+      item.subjects.length > 0 && (
+        <section class="subjects">
+          <h2 class="label">Subjects</h2>
+          <ul>
+            {item.subjects.map((s) => (
+              <li lang={isArabicDominant(s) ? 'ar' : undefined}>{s}</li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <section class="cite">
+      <h2 class="label">Cite this item</h2>
+      <p class="cite__text" id="cite">{cite}</p>
+      <p class="cite__note">
+        This record describes a physical holding, consultable on site. Contact{' '}<a href={`mailto:${site.email}`}>{site.email}</a>{' '}to arrange access.
+      </p>
+    </section>
+  </article>
+</Base>
+
+<style>
+  .crumb {
+    font-size: 0.85rem;
+    margin-bottom: 2rem;
+  }
+
+  .crumb a { color: var(--ink-muted); }
+
+  .head { margin-bottom: 2.5rem; }
+
+  h1 {
+    font-size: var(--step-2);
+    text-wrap: pretty;
+  }
+
+  .head__parallel {
+    font-size: var(--step-1);
+    margin: 0.5rem 0 0;
+    color: var(--ink);
+  }
+
+  .head__sole {
+    font-size: var(--step-2);
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .fields {
+    margin: 0 0 2.5rem;
+    border-top: 1px solid var(--rule);
+  }
+
+  .fields__row {
+    display: grid;
+    gap: 0.15rem 1.5rem;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+
+  @media (min-width: 34rem) {
+    .fields__row { grid-template-columns: 8rem minmax(0, 1fr); }
+  }
+
+  .fields dt { padding-top: 0.22rem; }
+  .fields dd { margin: 0; }
+
+  .subjects { margin-bottom: 2.5rem; }
+
+  .subjects ul {
+    list-style: none;
+    padding: 0;
+    margin: 0.6rem 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.5rem;
+  }
+
+  .subjects li {
+    font-size: 0.88rem;
+    padding: 0.15rem 0.6rem;
+    border: 1px solid var(--rule);
+    color: var(--ink-muted);
+  }
+
+  .cite {
+    border-top: 1px solid var(--rule);
+    padding-top: 1.5rem;
+  }
+
+  .cite__text {
+    margin: 0.6rem 0 0.8rem;
+    font-size: 0.95rem;
+    text-indent: -1.2em;
+    padding-left: 1.2em;
+  }
+
+  .cite__note {
+    font-size: 0.88rem;
+    color: var(--ink-muted);
+    margin: 0;
+  }
+</style>

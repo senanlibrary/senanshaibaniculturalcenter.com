@@ -1,0 +1,32 @@
+# ---------------------------------------------------------------------------
+# source/ — original material belonging to the center. Never published, never
+# committed. It is the input to the website, not part of it.
+#
+#   source/media/            original photographs (60 MB)
+#   source/wordpress-export/ the old site's export and mirrored uploads
+#   source/correspondence/   email; contains personal addresses
+#   source/handover/         intern documentation and invoices
+#
+# Keep a backup of this folder somewhere other than this machine. It is the
+# only copy of the originals.
+# ---------------------------------------------------------------------------
+source/
+
+# Build output and dependencies
+site/dist/
+site/.astro/
+site/node_modules/
+node_modules/
+
+# Editor and OS noise
+.DS_Store
+.claude/
+.vscode/
+
+# Secrets — none are needed to build the site, but do not commit any that appear
+.env
+.env.*
+
+# Private working notes are useful locally but are not part of the developer
+# handoff and may discuss family or migration decisions.
+private/

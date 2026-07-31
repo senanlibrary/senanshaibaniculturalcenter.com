@@ -1,0 +1,16 @@
+# Cloudflare Pages redirects.
+# Every URL the WordPress site published must keep resolving: scholars cite
+# them and search engines have indexed them.
+# (/catalog/ needs no entry -- it is now the native URL.)
+
+/research-resources/                    /collections/                                  301
+/research-resources/serials/            /guides/serials/                          301
+/journalism-in-the-arab-world/          /guides/journalism-in-the-arab-world/     301
+/women-in-the-arab-world/               /guides/women-in-the-arab-world/          301
+/contact/                               /visit/                                        301
+/2025/10/16/hello-world/                /                                              301
+
+# Guides moved out of /collections/ into their own section.
+/collections/serials/                   /guides/serials/                               301
+/collections/journalism-in-the-arab-world/  /guides/journalism-in-the-arab-world/      301
+/collections/women-in-the-arab-world/   /guides/women-in-the-arab-world/               301

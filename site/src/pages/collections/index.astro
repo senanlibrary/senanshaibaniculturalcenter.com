@@ -1,0 +1,121 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { libraries } from '../../config';
+import { items, nameKey } from '../../lib/catalog';
+
+const pages = await getCollection('pages');
+const intro = pages.find((p) => p.id === 'research-resources');
+const { Content } = intro ? await render(intro) : { Content: null };
+
+// Per-library counts, so "cataloged" is a number rather than a claim.
+// Keyed on the folded name because the catalog and the site spell the
+// library differently.
+const counts = new Map<string, number>();
+for (const item of items) {
+  const key = nameKey(item.library);
+  counts.set(key, (counts.get(key) ?? 0) + 1);
+}
+---
+
+<Base
+  title="Collections"
+  description="The three collections held at the Senan Shaibani Cultural Center, and subject guides to their particular strengths."
+  wide
+>
+  <div class="head">
+    <h1>Collections</h1>
+    <div class="prose">{Content && <Content />}</div>
+  </div>
+
+
+  <section aria-labelledby="libraries">
+    <h2 id="libraries">The libraries</h2>
+    <ul class="libraries">
+      {
+        libraries.map((library) => {
+          const n = counts.get(nameKey(library.name)) ?? 0;
+          return (
+            <li>
+              <h3>{library.name}</h3>
+              <p>{library.summary}</p>
+              <p class="status">
+                {n > 0 ? (
+                  <a href="/catalog/">{n.toLocaleString()} records cataloged</a>
+                ) : (
+                  'Cataloging in progress'
+                )}
+              </p>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </section>
+
+  <section aria-labelledby="partners">
+    <h2 id="partners">Collaborations</h2>
+    <p class="section-note">
+      The Center collaborates with the University of Texas at Austin, Texas
+      A&amp;M University, the University of Houston, and Rice University to
+      support students in Middle Eastern and Arabic Studies programs. Access to
+      materials is free of charge, with appropriate citation to the Center.
+    </p>
+  </section>
+
+  <section aria-labelledby="guides">
+    <h2 id="guides">Guides</h2>
+    <p class="section-note">
+      Written introductions to particular strengths of the collection, with
+      selected titles and their shelf locations.
+      <a href="/guides/">Browse all guides</a>.
+    </p>
+  </section>
+</Base>
+
+<style>
+  .head { width: min(100%, var(--measure)); }
+  .head h1 { margin-bottom: 1.2rem; }
+
+  section {
+    border-top: 1px solid var(--rule);
+    margin-top: 3.5rem;
+    padding-top: 2rem;
+  }
+
+  section h2 {
+    font-size: var(--step-1);
+    margin-bottom: 0.8rem;
+  }
+
+  .section-note {
+    color: var(--ink-muted);
+    max-width: var(--measure);
+    font-size: 0.95rem;
+  }
+
+  ul { list-style: none; margin: 1.8rem 0 0; padding: 0; }
+
+  .libraries {
+    display: grid;
+    gap: 2rem 3rem;
+  }
+
+  @media (min-width: 52rem) {
+    .libraries { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .libraries h3 { font-size: 1.1rem; margin-bottom: 0.35rem; }
+  .libraries p { margin: 0 0 0.6rem; font-size: 0.95rem; color: var(--ink-muted); }
+
+  .status {
+    font-size: 0.78rem !important;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .status a { text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+
+
+  @media (min-width: 44rem) {
+  </style>

@@ -1,0 +1,230 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { guides } from '../../config';
+
+export async function getStaticPaths() {
+  // Declared inside: Astro hoists getStaticPaths into its own scope, where
+  // module-level bindings are not visible.
+  const skip = new Set(['research-resources']);
+  const pages = await getCollection('pages');
+  return pages
+    .filter((page) => !skip.has(page.id))
+    .map((page) => ({ params: { slug: page.id }, props: { page } }));
+}
+
+const { page } = Astro.props;
+const { Content, headings } = await render(page);
+
+// Each entry in a guide is an h3. Long guides run to dozens of them, which is
+// what the contents rail is for.
+const entries = headings.filter((h) => h.depth === 3);
+const sections = headings.filter((h) => h.depth === 2);
+const contents = sections.length > 2 ? sections : entries;
+const blurb = guides.find((g) => g.slug === page.id)?.blurb;
+---
+
+<Base title={page.data.title} description={blurb} wide>
+  <nav class="crumb" aria-label="Breadcrumb">
+    <a href="/guides/">Guides</a>
+  </nav>
+
+  <div class="guide">
+    <article class="guide__body prose">
+      <h1 id="introduction">{page.data.title}</h1>
+      <Content />
+    </article>
+
+    {
+      contents.length > 3 && (
+        <aside class="guide__rail" aria-labelledby="contents" data-scrollspy>
+          <div class="guide__rail-inner">
+            <h2 class="label" id="contents">In this guide</h2>
+            <ol>
+              <li>
+                <a href="#introduction" data-spy="introduction">Introduction</a>
+              </li>
+              {contents.map((h) => (
+                <li>
+                  <a href={`#${h.slug}`} data-spy={h.slug}>{h.text}</a>
+                </li>
+              ))}
+            </ol>
+            <p class="guide__rail-foot">
+              <a href="/catalog/">Search the full catalog</a>
+            </p>
+          </div>
+        </aside>
+      )
+    }
+  </div>
+</Base>
+
+<script>
+  // Track which entry the reader is currently in and mark it in the rail.
+  // Without this the contents list is a static index that never reflects
+  // where you actually are in a guide that runs to dozens of entries.
+  const rail = document.querySelector('[data-scrollspy]');
+
+  if (rail) {
+    const links = new Map<string, HTMLAnchorElement>();
+    for (const a of rail.querySelectorAll<HTMLAnchorElement>('[data-spy]')) {
+      links.set(a.dataset.spy!, a);
+    }
+
+    const headings = [...links.keys()]
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
+
+    const list = rail.querySelector('ol')!;
+    let current: HTMLAnchorElement | null = null;
+
+    const mark = (el: HTMLElement) => {
+      const next = links.get(el.id);
+      if (!next || next === current) return;
+      current?.removeAttribute('aria-current');
+      next.setAttribute('aria-current', 'true');
+      current = next;
+
+      // Long guides scroll the rail itself, so keep the active entry in view
+      // without dragging the page along with it.
+      const l = list.getBoundingClientRect();
+      const n = next.getBoundingClientRect();
+      if (n.top < l.top || n.bottom > l.bottom) {
+        list.scrollTop += n.top - l.top - l.height / 2 + n.height / 2;
+      }
+    };
+
+    // The heading nearest above the reading line is the section being read.
+    // Sections are often taller than the viewport, so this picks the last
+    // heading that has passed rather than whichever one is on screen.
+    const update = () => {
+      const line = window.innerHeight * 0.3;
+      let best: HTMLElement | null = null;
+      for (const h of headings) {
+        if (h.getBoundingClientRect().top <= line) best = h;
+        else break;
+      }
+      mark(best ?? headings[0]);
+    };
+
+    // Two triggers, deliberately: the observer fires on exactly the
+    // crossings that matter, and the scroll listener covers anything that
+    // does not service observer callbacks. Both funnel through one throttled
+    // update, so running both costs no more than running either.
+    //
+    // Throttled on a timer rather than requestAnimationFrame, which is tied
+    // to the rendering loop and stalls whenever the page is not being
+    // painted -- leaving the rail stuck on whichever entry was marked last.
+    let queued = false;
+    const schedule = () => {
+      if (queued) return;
+      queued = true;
+      setTimeout(() => {
+        queued = false;
+        update();
+      }, 80);
+    };
+
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(schedule, {
+        rootMargin: '0px 0px -70% 0px',
+        threshold: [0, 1],
+      });
+      for (const h of headings) io.observe(h);
+    }
+
+    addEventListener('scroll', schedule, { passive: true });
+    addEventListener('resize', schedule, { passive: true });
+    update();
+  }
+</script>
+
+<style>
+  .crumb { font-size: 0.85rem; margin-bottom: 2rem; }
+  .crumb a { color: var(--ink-muted); }
+
+  .guide {
+    display: grid;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  /* The rail only appears where there is genuinely room for it; below this
+     the guide is a single column and the contents list would just be
+     something to scroll past. */
+  @media (min-width: 64rem) {
+    .guide {
+      grid-template-columns: minmax(0, var(--measure)) var(--rail);
+      /* Text left, contents in the far margin, like the marginal notes of a
+         printed finding aid. Keeps the column at a readable measure without
+         leaving a block of dead space at the right edge. */
+      justify-content: space-between;
+      gap: 4.5rem;
+    }
+  }
+
+  .guide__body h1 { margin-bottom: 1.5rem; }
+
+  .guide__rail {
+    align-self: stretch;
+    height: 100%;
+  }
+
+  .guide__rail-inner {
+    position: sticky;
+    top: 2rem;
+    border-top: 1px solid var(--rule);
+    padding-top: 0.9rem;
+  }
+
+  .guide__rail ol {
+    list-style: none;
+    margin: 0.9rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 0.55rem;
+    /* Long guides would otherwise run past the viewport. */
+    max-height: calc(100vh - 12rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .guide__rail a {
+    font-size: 0.88rem;
+    line-height: 1.35;
+    text-decoration: none;
+    color: var(--ink-muted);
+    display: block;
+  }
+
+  .guide__rail a:hover { color: var(--accent); }
+
+  /* The entry the reader is currently in. A rule in the margin rather than a
+     highlight: it marks the place without competing with the text. */
+  .guide__rail a[aria-current='true'] {
+    color: var(--ink);
+    box-shadow: -0.85rem 0 0 -0.75rem var(--accent);
+  }
+
+  .guide__rail a { scroll-margin: 0.5rem; }
+
+  .guide__rail-foot {
+    margin: 1.2rem 0 0;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--rule-soft);
+    font-size: 0.88rem;
+  }
+
+  @media (max-width: 63.99rem) {
+    .guide__rail-inner { position: static; }
+    .guide__rail ol { max-height: none; overflow: visible; }
+  }
+
+  /* Headings sit clear of the top edge when jumped to from the rail. */
+  :global(.guide__body h1),
+  :global(.guide__body h2),
+  :global(.guide__body h3) {
+    scroll-margin-top: 1.5rem;
+  }
+</style>
