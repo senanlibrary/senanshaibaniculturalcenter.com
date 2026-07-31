@@ -18,6 +18,9 @@ site/.astro/
 site/node_modules/
 node_modules/
 
+# Generated from the tracked Zotero CSV by npm run catalog.
+data/catalog.json
+
 # Editor and OS noise
 .DS_Store
 .claude/

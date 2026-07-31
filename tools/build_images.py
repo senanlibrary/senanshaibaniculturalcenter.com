@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Rebuild the site's images from the originals in source/media.
+"""Rebuild the site's images from a separately held private source folder.
 
 The site uses very few images, each deliberately chosen and cropped. This
 script records those decisions so they can be repeated, adjusted, or undone
 by someone who was not there when they were made.
 
     pip3 install pillow
-    python3 tools/build_images.py
+    SSCC_SOURCE_DIR="../sscc_private/source" python3 tools/build_images.py
 
 Nothing here runs during a normal build: the results are committed to
 site/public/img/. Run it only when changing which images the site uses, or
@@ -28,7 +28,8 @@ except ImportError:
     sys.exit("Pillow is required:  pip3 install pillow")
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SRC = os.path.join(ROOT, "source")
+DEFAULT_SRC = os.path.join(os.path.dirname(ROOT), "sscc_private", "source")
+SRC = os.path.abspath(os.environ.get("SSCC_SOURCE_DIR", DEFAULT_SRC))
 OUT = os.path.join(ROOT, "site", "public", "img")
 
 WIDE = 16 / 9
@@ -110,7 +111,8 @@ def main():
 if __name__ == "__main__":
     if not os.path.isdir(SRC):
         sys.exit(
-            "source/ not found. It holds the original photographs and is not\n"
-            "committed to git — restore it from backup before running this."
+            f"Private source folder not found: {SRC}\n"
+            "Set SSCC_SOURCE_DIR to the folder containing media/ and\n"
+            "wordpress-export/, then run this command again."
         )
     main()

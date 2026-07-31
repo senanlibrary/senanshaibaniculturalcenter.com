@@ -124,7 +124,8 @@ export function citation(item: Item, siteName: string): string {
 /**
  * Facets worth exposing as filters. Subject terms are deliberately excluded:
  * with 73% of them used exactly once they do not yet partition the
- * collection usefully (see docs/cataloging-recommendations.md).
+ * collection usefully. Revisit this with the cataloging team as coverage
+ * improves.
  */
 export const filterFacets = [
   { key: 'languages', label: 'Language', values: facets.languages },

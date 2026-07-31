@@ -8,8 +8,8 @@ overwritten and this script's work is never lost.
 
 Scope is deliberately minimal. Per the center's decision, the subject
 vocabulary developed by the cataloging team is left intact -- only whitespace,
-duplicate, and encoding issues are corrected. Proposed vocabulary changes live
-in docs/cataloging-recommendations.md for the team to accept or reject.
+duplicate, and encoding issues are corrected. Vocabulary changes require the
+cataloging team's agreement before they are added here.
 """
 import csv
 import json

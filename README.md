@@ -65,11 +65,8 @@ what is wrong.
 |---|---|
 | `site/` | The website. Astro project — components, pages, styles, fonts |
 | `content/pages/` | The words on the page, as Markdown. Safe to edit |
-| `data/` | The Zotero export, and the `catalog.json` generated from it |
+| `data/` | The tracked Zotero CSV; `catalog.json` is generated from it |
 | `tools/` | Python scripts: catalog build, image build, output checks |
-| `docs/` | One cataloging memo for the library team |
-| `source/` | **Original material. Not in git.** See the warning below |
-| `private/` | Optional local working notes. Not in git |
 
 Inside `site/src/`:
 
@@ -82,16 +79,17 @@ Inside `site/src/`:
 | `lib/catalog.ts` | Reads `catalog.json` and exposes it to pages |
 | `styles/global.css` | Colors, type, spacing. All design tokens are at the top |
 
-### `source/` is not in git, and is not backed up by pushing
+### The private archive is separate from this repository
 
-`source/` holds the center's original material: 60 MB of photographs, the old
-WordPress export, correspondence, and the intern's handover documents. It is
-deliberately excluded from version control — it contains personal email
-addresses, and the photographs are far too large to belong in a repository.
+Original photographs, the WordPress export, correspondence, handover files,
+and private project notes live in a separate private folder outside this
+repository. They are deliberately excluded from version control because they
+contain personal information and large archival files.
 
-**Cloning this repository will not give you `source/`.** Keep at least one
-independent backup of it. Treat the original photographs as irreplaceable;
-`tools/build_images.py` cannot run without them.
+Cloning this repository provides everything needed to run and deploy the
+website. It does not provide the original archival files. Keep at least one
+independent backup of that private folder. `tools/build_images.py` only needs
+it when the public image derivatives themselves are being changed.
 
 ---
 
@@ -135,9 +133,18 @@ Navigation is never written by hand.
 
 ### Change the images
 
-Run `tools/build_images.py`, which regenerates every site image from
-`source/` and records each crop and exposure decision in code. Requires
-`pip3 install pillow` and a copy of `source/`.
+`tools/build_images.py` regenerates every site image from the separately held
+originals and records each crop and exposure decision in code. It requires
+[Pillow](https://pillow.readthedocs.io/) and the path to the private source
+folder:
+
+```bash
+pip3 install pillow
+SSCC_SOURCE_DIR="../sscc_private/source" python3 tools/build_images.py
+```
+
+The folder name is only an example; set `SSCC_SOURCE_DIR` to wherever the
+private `source` folder is stored.
 
 The results are committed to `site/public/img/`, so this only needs running
 when the images themselves change.
@@ -276,9 +283,8 @@ displayed or written back to Zotero.
 
 Coverage is **890 records**, all from the Rifʿat al-Saʿīd Library, against an
 estimated 10,000+ item holding. Subject vocabulary is left exactly as
-cataloged; proposals for changing it are in
-[docs/cataloging-recommendations.md](docs/cataloging-recommendations.md) for
-the cataloging team to accept or reject.
+cataloged. Any future vocabulary changes should be agreed with the cataloging
+team before they are added to the build script.
 
 ---
 
@@ -289,18 +295,8 @@ the cataloging team to accept or reject.
   a prebuilt index or [Pagefind](https://pagefind.app) rather than the current
   linear scan.
 - **Subject terms are not offered as filters**, because 73% of them are used
-  exactly once. See the cataloging recommendations.
-
-## Documentation
-
-There is one document beyond this README:
-
-- [docs/cataloging-recommendations.md](docs/cataloging-recommendations.md) —
-  a memo for the cataloging team about the subject vocabulary
-
-Private reporting and migration notes may be kept locally in `private/`.
-That directory is ignored by git because those notes are not part of a
-developer handoff and may include family context.
+  exactly once. This should be revisited with the cataloging team as coverage
+  improves.
 
 ## License
 

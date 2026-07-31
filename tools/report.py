@@ -2,8 +2,8 @@
 """Produce the cataloging figures for the monthly note.
 
 Traffic numbers come from the Cloudflare dashboard; these are the figures
-that go up every month and belong at the top of the report. Reporting notes
-are kept locally under private/ rather than published with the code.
+that go up every month and belong at the top of the report. Private reporting
+notes are deliberately held outside this repository.
 """
 import json
 import os
