@@ -157,11 +157,42 @@ runs `.github/workflows/deploy-pages.yml`, which installs the pinned
 dependencies, builds and validates the site, and publishes `site/dist/` to
 GitHub Pages. A failed validation is not deployed.
 
-The repository is a project site, but the website's permanent address is the
-custom root domain in `site/astro.config.mjs`. Root-relative links are
-intentional. Configure the custom domain when DNS is moved; do not treat the
-temporary `/senanshaibaniculturalcenter.com/` project path as the production
+### Where the site is served from
+
+The site's permanent home is the custom domain, at the **root** of its host.
+That is the default everywhere: local development, `npm run build`, and the
+eventual production site all need no configuration.
+
+GitHub project Pages is the exception. It serves from a subdirectory named
+after the repository — `/senanshaibaniculturalcenter.com/` — so every internal
+link has to carry that prefix or it resolves against the organization root and
+404s. Two environment variables handle this, and they are set **only** in the
+deploy workflow:
+
+| Variable | Purpose |
+|---|---|
+| `BASE_PATH` | The subdirectory the site is served from. Defaults to `/` |
+| `SITE_URL` | The origin, used for canonical tags and the sitemap |
+
+To build the subpath version locally, exactly as the workflow does:
+
+```bash
+cd site
+BASE_PATH=/senanshaibaniculturalcenter.com/ \
+SITE_URL=https://senanlibrary.github.io npm run build
+```
+
+**When the custom domain is attached, delete the `env:` block from
+`.github/workflows/deploy-pages.yml`.** A custom domain serves from the root,
+and leaving those variables set would prefix every link with the repository
+name. That is the only change required — no site code refers to either
 address.
+
+Internal links must go through the `url()` helper in `site/src/lib/paths.ts`
+so they respect the base. Images written in Markdown should use paths relative
+to the Markdown file (`../img/…`), which Astro resolves and fingerprints.
+Writing a bare `/img/…` in Markdown produces a link that breaks under a
+subpath, because Astro passes Markdown URLs through untouched.
 
 ### The web editor
 
@@ -252,6 +283,12 @@ almost no range and appears not to stick. The guide rail sets
 
 **The dev server sometimes serves stale content** after changes to
 `config.ts` or `data/catalog.json`. Restart it.
+
+**Root-relative paths break when the site is served from a subdirectory.**
+Write internal links as `url('/catalog/')`, not `href="/catalog/"`, and
+Markdown images as `../img/cover.jpg`, not `/img/cover.jpg`. Raw `<img>` tags
+in Markdown are passed through untouched and their files are never emitted at
+all — use Markdown image syntax so Astro processes them.
 
 **Arabic is decided by dominance, not presence.** A value is typeset
 right-to-left only when Arabic outweighs Latin in it. Names like
