@@ -30,17 +30,25 @@ except ImportError:
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEFAULT_SRC = os.path.join(os.path.dirname(ROOT), "sscc_private", "source")
 SRC = os.path.abspath(os.environ.get("SSCC_SOURCE_DIR", DEFAULT_SRC))
-OUT = os.path.join(ROOT, "site", "public", "img")
+# Two destinations, because the site references images two different ways.
+#   PUBLIC — used by Astro templates through the url() helper.
+#   CONTENT — used by Markdown, which references images relative to the prose
+#     file so Astro resolves, optimizes and fingerprints them. That is what
+#     keeps their URLs correct when the site is served from a subdirectory.
+PUBLIC = os.path.join(ROOT, "site", "public", "img")
+CONTENT = os.path.join(ROOT, "content", "img")
 
 WIDE = 16 / 9
 
 
-def save(im, name, width, quality=82):
-    path = os.path.join(OUT, name)
+def save(im, name, width, quality=82, out=None):
+    path = os.path.join(out or PUBLIC, name)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     im = im.resize((width, round(width * im.size[1] / im.size[0])), Image.LANCZOS)
     im.save(path, "JPEG", quality=quality, optimize=True, progressive=True)
-    print(f"  {name:24} {os.path.getsize(path) // 1024:4} KB  {im.size[0]}x{im.size[1]}")
+    where = os.path.relpath(os.path.dirname(path), ROOT)
+    print(f"  {name:24} {os.path.getsize(path) // 1024:4} KB  "
+          f"{im.size[0]}x{im.size[1]}  -> {where}")
 
 
 def wide(path, left=0.0, width=1.0, top=0.5, brightness=1.0, autocontrast=0):
@@ -65,7 +73,8 @@ def wide(path, left=0.0, width=1.0, top=0.5, brightness=1.0, autocontrast=0):
 
 
 def main():
-    os.makedirs(OUT, exist_ok=True)
+    os.makedirs(PUBLIC, exist_ok=True)
+    os.makedirs(os.path.join(CONTENT, "covers"), exist_ok=True)
 
     # Homepage. Cropped to the left two-thirds: the windows on the right blow
     # out and the glare was the first thing the eye landed on.
@@ -88,7 +97,10 @@ def main():
     ).crop((150, 120, 2970, 4270))
     fw, fh = stereo.size
     th = int(fw / WIDE)
-    save(stereo.crop((0, int(fh * 0.20), fw, int(fh * 0.20) + th)), "bride-nazareth.jpg", 1400)
+    save(
+        stereo.crop((0, int(fh * 0.20), fw, int(fh * 0.20) + th)),
+        "bride-nazareth.jpg", 1400, out=CONTENT,
+    )
 
     # About. Portrait, so no 16:9 crop; the black pillarbox bars are trimmed.
     senan = Image.open(
@@ -105,7 +117,7 @@ def main():
             print(f"  covers/{i}.jpg  MISSING {src}")
             continue
         im = Image.open(src).convert("RGB")
-        save(im, f"covers/{i}.jpg", im.size[0], quality=90)
+        save(im, f"covers/{i}.jpg", im.size[0], quality=90, out=CONTENT)
 
 
 if __name__ == "__main__":

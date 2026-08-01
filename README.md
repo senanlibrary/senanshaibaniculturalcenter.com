@@ -145,8 +145,13 @@ SSCC_SOURCE_DIR="../sscc_private/source" python3 tools/build_images.py
 The folder name is only an example; set `SSCC_SOURCE_DIR` to wherever the
 private `source` folder is stored.
 
-The results are committed to `site/public/img/`, so this only needs running
-when the images themselves change.
+The results are committed, so this only needs running when the images
+themselves change. It writes to two places, because the site references images
+two different ways:
+
+- `site/public/img/` — images used by Astro templates, via the `url()` helper
+- `content/img/` — images used by Markdown, which references them relative to
+  the prose file so Astro optimizes them and keeps their URLs base-correct
 
 ---
 
