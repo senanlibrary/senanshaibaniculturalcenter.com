@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import { url } from '../lib/paths';
 import Figure from '../components/Figure.astro';
 import { site, libraries } from '../config';
 import { count } from '../lib/catalog';
@@ -35,7 +36,7 @@ import { count } from '../lib/catalog';
   <h2>Senan Shaibani</h2>
 
   <Figure
-    src="/img/senan.jpg"
+    src={url('/img/senan.jpg')}
     alt="Senan Shaibani, a young bearded man, smiling in front of a flowering bougainvillea."
     caption="Senan Shaibani."
     portrait

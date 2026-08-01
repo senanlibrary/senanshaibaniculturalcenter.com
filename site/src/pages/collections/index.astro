@@ -1,5 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
+import { url } from '../../lib/paths';
 import Base from '../../layouts/Base.astro';
 import { libraries } from '../../config';
 import { items, nameKey } from '../../lib/catalog';
@@ -41,7 +42,7 @@ for (const item of items) {
               <p>{library.summary}</p>
               <p class="status">
                 {n > 0 ? (
-                  <a href="/catalog/">{n.toLocaleString()} records cataloged</a>
+                  <a href={url('/catalog/')}>{n.toLocaleString()} records cataloged</a>
                 ) : (
                   'Cataloging in progress'
                 )}
@@ -68,7 +69,7 @@ for (const item of items) {
     <p class="section-note">
       Written introductions to particular strengths of the collection, with
       selected titles and their shelf locations.
-      <a href="/guides/">Browse all guides</a>.
+      <a href={url('/guides/')}>Browse all guides</a>.
     </p>
   </section>
 </Base>

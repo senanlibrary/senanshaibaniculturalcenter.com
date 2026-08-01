@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import { url } from '../lib/paths';
 import Figure from '../components/Figure.astro';
 import { count } from '../lib/catalog';
 import { libraries, site, guides } from '../config';
@@ -18,13 +19,13 @@ import { libraries, site, guides } from '../config';
       United States. Materials are consultable on site.
     </p>
     <p class="opening__actions">
-      <a class="action" href="/catalog/">Search the catalog</a>
+      <a class="action" href={url('/catalog/')}>Search the catalog</a>
       <span class="opening__count">{count.toLocaleString()} records available</span>
     </p>
   </section>
 
   <Figure
-    src="/img/reading-room.jpg"
+    src={url('/img/reading-room.jpg')}
     alt="The reading room: walls of shelved books in dark wood cases, a leather sofa and chairs on a patterned carpet, and a bronze portrait bust on an inscribed plinth at the left."
     caption="The reading room in Lincoln, Texas."
     hero
@@ -58,7 +59,7 @@ import { libraries, site, guides } from '../config';
       {
         guides.map((guide) => (
           <li>
-            <a href={`/guides/${guide.slug}/`}>{guide.title}</a>
+            <a href={url(`/guides/${guide.slug}/`)}>{guide.title}</a>
             <span>{guide.blurb}</span>
           </li>
         ))

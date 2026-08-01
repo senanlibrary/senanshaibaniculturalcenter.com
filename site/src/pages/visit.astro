@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import { url } from '../lib/paths';
 import Figure from '../components/Figure.astro';
 import { site } from '../config';
 ---
@@ -16,7 +17,7 @@ import { site } from '../config';
   </p>
 
   <Figure
-    src="/img/stone-marker.jpg"
+    src={url('/img/stone-marker.jpg')}
     alt="A carved limestone marker outside the center reading Senan Shaibani Cultural Center, Established 2025."
     caption="The center, forty-five miles east of Austin."
     width={1400}

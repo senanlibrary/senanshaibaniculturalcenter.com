@@ -165,10 +165,12 @@ hr {
   max-width: min(100%, 38rem);
 }
 
-/* A band of jackets at the head of a guide: decorative, showing what the
-   collection physically looks like, without claiming to caption each entry.
-   Scanned from a low-resolution sheet, so shown well under native width. */
-.cover-band {
+/* A paragraph holding several images in a row is a band of book jackets at
+   the head of a guide: decorative, showing what the collection physically
+   looks like, without claiming to caption each entry.
+   Written as plain Markdown images so Astro fingerprints them and the URLs
+   stay correct wherever the site is served from. */
+.prose p:has(> img + img) {
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
@@ -176,15 +178,16 @@ hr {
   margin: 0 0 0.75rem;
 }
 
-.cover-band img {
+.prose p:has(> img + img) img {
   /* Sized so all six jackets sit on one line at the reading measure. */
   height: 8rem;
   width: auto;
+  max-width: none;
   box-shadow: 0 1px 3px rgb(0 0 0 / 0.18);
 }
 
 @media (max-width: 40rem) {
-  .cover-band img { height: 6.5rem; }
+  .prose p:has(> img + img) img { height: 6.5rem; }
 }
 
 .prose p:has(> img) {

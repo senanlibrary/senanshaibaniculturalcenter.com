@@ -1,5 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
+import { url } from '../../lib/paths';
 import Base from '../../layouts/Base.astro';
 import { guides } from '../../config';
 
@@ -26,7 +27,7 @@ const blurb = guides.find((g) => g.slug === page.id)?.blurb;
 
 <Base title={page.data.title} description={blurb} wide>
   <nav class="crumb" aria-label="Breadcrumb">
-    <a href="/guides/">Guides</a>
+    <a href={url('/guides/')}>Guides</a>
   </nav>
 
   <div class="guide">
@@ -51,7 +52,7 @@ const blurb = guides.find((g) => g.slug === page.id)?.blurb;
               ))}
             </ol>
             <p class="guide__rail-foot">
-              <a href="/catalog/">Search the full catalog</a>
+              <a href={url('/catalog/')}>Search the full catalog</a>
             </p>
           </div>
         </aside>

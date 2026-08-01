@@ -3,14 +3,12 @@ title: "Journalism in the Arab World"
 slug: "journalism-in-the-arab-world"
 legacyUrl: "https://senanshaibaniculturalcenter.org/journalism-in-the-arab-world/"
 ---
-<div class="cover-band">
-<img src="/img/covers/1.jpg" alt="" />
-<img src="/img/covers/2.jpg" alt="" />
-<img src="/img/covers/3.jpg" alt="" />
-<img src="/img/covers/4.jpg" alt="" />
-<img src="/img/covers/5.jpg" alt="" />
-<img src="/img/covers/6.jpg" alt="" />
-</div>
+![](../img/covers/1.jpg)
+![](../img/covers/2.jpg)
+![](../img/covers/3.jpg)
+![](../img/covers/4.jpg)
+![](../img/covers/5.jpg)
+![](../img/covers/6.jpg)
 
 *Titles from the collection on the history of the Arab press.*
 

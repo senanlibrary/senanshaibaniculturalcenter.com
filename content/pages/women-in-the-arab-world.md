@@ -7,7 +7,7 @@ Arab women have long been active participants in shaping the political, intellec
 
 Below are some highlighted titles within the collection. To locate all books related to women in the Arab world in our database, search using the keyword “Women” in all of our libraries.
 
-![A wedding party of five women and girls photographed outdoors beneath a tree, the bride seated at the center in an embroidered white dress.](/img/bride-nazareth.jpg)
+![A wedding party of five women and girls photographed outdoors beneath a tree, the bride seated at the center in an embroidered white dress.](../img/bride-nazareth.jpg)
 
 *Bride in Nazareth, ca. 1910. Detail from one half of a stereograph held in the collection.*
 

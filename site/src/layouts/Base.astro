@@ -1,5 +1,8 @@
 ---
 import '../styles/global.css';
+import { url } from '../lib/paths';
+// ?url gives the hashed, base-correct path Vite emits for this font.
+import ebGaramondRegular from '../fonts/ebgaramond-latin-400-normal.woff2?url';
 import { site, nav, guides } from '../config';
 
 interface Props {
@@ -21,8 +24,8 @@ const path = Astro.url.pathname;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={new URL(path, site.url)} />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="canonical" href={new URL(path, Astro.site ?? site.url)} />
+    <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
@@ -38,7 +41,7 @@ const path = Astro.url.pathname;
     <!-- Preload only the regular Latin face; the rest can swap in. -->
     <link
       rel="preload"
-      href="/fonts/ebgaramond-latin-400-normal.woff2"
+      href={ebGaramondRegular}
       as="font"
       type="font/woff2"
       crossorigin
@@ -49,7 +52,7 @@ const path = Astro.url.pathname;
 
     <header class="masthead">
       <div class="shell masthead__inner">
-        <a class="masthead__mark" href="/">
+        <a class="masthead__mark" href={url('/')}>
           <span class="masthead__name">{site.name}</span>
           <span class="masthead__sub">{site.location}</span>
         </a>
@@ -59,8 +62,8 @@ const path = Astro.url.pathname;
               nav.map((item) => (
                 <li class={'children' in item ? 'nav__item nav__item--has-menu' : 'nav__item'}>
                   <a
-                    href={item.href}
-                    aria-current={path.startsWith(item.href) ? 'page' : undefined}
+                    href={url(item.href)}
+                    aria-current={path.startsWith(url(item.href)) ? 'page' : undefined}
                   >
                     {item.label}
                   </a>
@@ -78,7 +81,7 @@ const path = Astro.url.pathname;
                       <ul class="nav__menu" id="menu-collections" hidden>
                         {item.children.map((child) => (
                           <li>
-                            <a href={child.href}>{child.label}</a>
+                            <a href={url(child.href)}>{child.label}</a>
                           </li>
                         ))}
                       </ul>
@@ -113,7 +116,7 @@ const path = Astro.url.pathname;
           <ul>
             {nav.map((item) => (
               <li>
-                <a href={item.href}>{item.label}</a>
+                <a href={url(item.href)}>{item.label}</a>
               </li>
             ))}
           </ul>
@@ -124,7 +127,7 @@ const path = Astro.url.pathname;
           <ul>
             {guides.map((guide) => (
               <li>
-                <a href={`/guides/${guide.slug}/`}>{guide.title}</a>
+                <a href={url(`/guides/${guide.slug}/`)}>{guide.title}</a>
               </li>
             ))}
           </ul>

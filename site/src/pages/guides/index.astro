@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import { url } from '../../lib/paths';
 import { guides } from '../../config';
 ---
 
@@ -18,7 +19,7 @@ import { guides } from '../../config';
     <p class="note">
       Guides are written by the center's catalogers as material is processed,
       and are added to over time. For everything cataloged to date, search
-      the{' '}<a href="/catalog/">catalog</a>.
+      the{' '}<a href={url('/catalog/')}>catalog</a>.
     </p>
   </div>
 
@@ -26,7 +27,7 @@ import { guides } from '../../config';
     {
       guides.map((guide) => (
         <li>
-          <a href={`/guides/${guide.slug}/`}>
+          <a href={url(`/guides/${guide.slug}/`)}>
             <h2>{guide.title}</h2>
             <p>{guide.blurb}</p>
           </a>

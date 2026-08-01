@@ -34,6 +34,16 @@ jobs:
 
       - name: Build and validate site
         working-directory: site
+        # GitHub project Pages serves from /<repository>/, so the site is
+        # built for that subpath. Both variables exist only for this build:
+        # everywhere else the site defaults to the root of its domain.
+        #
+        # WHEN THE CUSTOM DOMAIN IS ATTACHED, DELETE THIS `env:` BLOCK.
+        # A custom domain serves from the root, and leaving these set would
+        # prefix every link with the repository name.
+        env:
+          BASE_PATH: /senanshaibaniculturalcenter.com/
+          SITE_URL: https://senanlibrary.github.io
         run: npm run build
 
       - name: Configure GitHub Pages

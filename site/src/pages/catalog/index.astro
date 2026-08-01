@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import { url } from '../../lib/paths';
 import { count, filterFacets, items, facets } from '../../lib/catalog';
 import { libraries } from '../../config';
 
@@ -86,7 +87,7 @@ const libraryFacet = facets.libraries ?? [];
     <div id="records" role="rowgroup">
       {
         fallback.map((item) => (
-          <a class="rec-row" href={`/catalog/${item.id}/`} role="row">
+          <a class="rec-row" href={url(`/catalog/${item.id}/`)} role="row">
             <span class="rec-cell rec-cell--title" role="cell">
               {item.title ? <span>{item.title}</span> : <span lang="ar">{item.titleArabic}</span>}
               {item.title && item.titleArabic && (
@@ -115,7 +116,7 @@ const libraryFacet = facets.libraries ?? [];
     <p class="note">
       Showing the first {fallback.length} records. Searching and filtering
       require JavaScript; every record also has its own page, and the complete
-      list is available as <a href="/catalog/index.json">JSON</a>.
+      list is available as <a href={url('/catalog/index.json')}>JSON</a>.
     </p>
   </noscript>
 
@@ -134,6 +135,10 @@ const libraryFacet = facets.libraries ?? [];
     y: number | null; l: string[]; r: number | null; c: string;
     s: string; k: string;
   }
+
+  // Astro replaces this at build time with the configured base, so links
+  // built in the browser match those rendered on the server.
+  const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 
   const PAGE = 50;
   const ARABIC = /[؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿]/;
@@ -184,7 +189,7 @@ const libraryFacet = facets.libraries ?? [];
         : `<span lang="ar">${esc(r.a)}</span>`;
       const parallel = r.t && r.a
         ? `<span class="rec-cell__arabic" lang="ar">${esc(r.a)}</span>` : '';
-      return `<a class="rec-row" href="/catalog/${r.i}/" role="row">
+      return `<a class="rec-row" href="${BASE}/catalog/${r.i}/" role="row">
         <span class="rec-cell rec-cell--title" role="cell">${title}${parallel}</span>
         <span class="rec-cell rec-cell--author" role="cell"><span class="rec-cell__label">Author</span>${esc(r.u || '—')}</span>
         <span class="rec-cell rec-cell--year" role="cell"><span class="rec-cell__label">Year</span>${r.y ?? '—'}</span>
@@ -253,7 +258,7 @@ const libraryFacet = facets.libraries ?? [];
     timer = window.setTimeout(apply, 120);
   };
 
-  fetch('/catalog/index.json')
+  fetch(`${BASE}/catalog/index.json`)
     .then((r) => r.json())
     .then((data: Row[]) => {
       rows = data;

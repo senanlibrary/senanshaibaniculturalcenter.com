@@ -13,6 +13,11 @@ import sys
 # the repository root or from site/ as an npm script.
 DIST = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "site", "dist")
 
+# When the site is built for a subdirectory (GitHub project Pages), every
+# internal link carries that prefix while the files on disk do not. Strip it
+# before checking a link resolves. Matches the astro.config default.
+BASE = os.environ.get("BASE_PATH", "/").rstrip("/")
+
 
 def read(path):
     with open(path, encoding="utf-8", errors="ignore") as fh:
@@ -40,6 +45,10 @@ def check_broken_links(pages):
         for href in re.findall(r'href="(/[^"#?]*)"', strip_scripts(html)):
             if href.startswith("//"):
                 continue
+            if BASE and href.startswith(BASE + "/"):
+                href = href[len(BASE):]
+            elif BASE and href == BASE:
+                href = "/"
             target = href.lstrip("/")
             candidates = [target, os.path.join(target, "index.html")]
             if not any(os.path.exists(os.path.join(DIST, c)) for c in candidates):

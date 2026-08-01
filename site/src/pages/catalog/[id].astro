@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import { url } from '../../lib/paths';
 import {
   items,
   displayTitle,
@@ -42,7 +43,7 @@ const cite = citation(item, site.name);
     .join('. ')}
 >
   <nav class="crumb" aria-label="Breadcrumb">
-    <a href="/catalog/">Catalog</a>
+    <a href={url('/catalog/')}>Catalog</a>
   </nav>
 
   <article>
