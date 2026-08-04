@@ -279,10 +279,16 @@ answer researchers as the institution, add `contact@` as a *send-as* identity
 in Gmail, which needs an SMTP relay. Worth doing before the site starts
 attracting enquiries.
 
-`site/public/_redirects` preserves every URL the old WordPress site published.
-It is a Cloudflare format and does nothing on GitHub Pages — if old links
-matter once the domain moves, either put Cloudflare in front of the site or
-convert those rules to redirect pages.
+#### Old addresses
+
+Every URL the old WordPress site published still works. They appear in the
+cataloging team's documentation and in search results, so they are forwarded
+rather than abandoned.
+
+The table lives in `site/src/redirects.txt` — one `from  to` pair per line.
+The build turns each into a small forwarding page, because GitHub Pages serves
+static files only and cannot issue a real 301 redirect. Adding a redirect
+means adding a line; nothing else.
 
 ### Analytics
 

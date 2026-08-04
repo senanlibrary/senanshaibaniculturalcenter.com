@@ -1,6 +1,11 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import { readRedirects } from './src/lib/redirects.mjs';
+
+// Forwarding pages must stay out of the sitemap: they are signposts to the
+// real pages, not content in their own right.
+const redirectPaths = new Set(readRedirects().map((r) => r.from));
 
 /**
  * Where the site lives.
@@ -21,7 +26,14 @@ const base = process.env.BASE_PATH ?? '/';
 export default defineConfig({
   site,
   base,
-  integrations: [sitemap()],
+  integrations: [
+    sitemap({
+      filter: (page) => {
+        const path = new URL(page).pathname.replace(base.replace(/\/$/, ''), '');
+        return !redirectPaths.has(path);
+      },
+    }),
+  ],
   build: {
     // Directory-style URLs keep catalog record links stable and citable.
     format: 'directory',
