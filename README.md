@@ -211,41 +211,78 @@ Editors then sign in at `/admin/`. Every save is a git commit, so changes are
 attributable and revertible, and the content stays plain Markdown if the
 editor is ever removed.
 
-### DNS — the part that needs care
+### DNS and email cutover
 
-**Read this before cancelling anything at WordPress.com.**
+**The site is on GitHub Pages. The domain, DNS, and mailbox are still at
+WordPress.com.** These are four separate things and they move independently.
 
-Four separate things are attached to the domain, and they move independently:
+| Thing | Where it is | Where it is going |
+|---|---|---|
+| Registration (`.org`, `.com`) | Automattic, expires Oct 2027 | Stays for now |
+| DNS | `ns1–3.wordpress.com` | Cloudflare |
+| Web hosting | WordPress.com | GitHub Pages |
+| Email | Titan, billed via WordPress.com | Cloudflare Email Routing |
 
-| Thing | Where it is now |
-|---|---|
-| Registration | WordPress.com (both `.com` and `.org`) |
-| DNS | WordPress.com nameservers (`ns1–3.wordpress.com`) |
-| Web hosting | WordPress.com |
-| **Email** | **Titan** (`mx1.titan.email`), billed through WordPress.com |
+`senanshaibaniculturalcenter.org` is canonical. `.com` has no mail records and
+only redirects.
 
-`contact@senanshaibaniculturalcenter.org` is published on the site and in the
-catalog's citation guidance. **Cancelling the WordPress.com plan may terminate
-that mailbox.** Confirm with their support what happens to it before
-cancelling anything.
+**`contact@senanshaibaniculturalcenter.org` is printed on the site and in
+every suggested citation. Cancelling the WordPress.com plan takes the Titan
+mailbox with it.** Email must be working somewhere else *before* that plan is
+cancelled — not the same day, and not on trust.
 
-Recommended order:
+#### The full record set, as it stands today
 
-1. Confirm that the GitHub Pages deployment workflow succeeds
-2. Move DNS to a provider you control, recreating these mail records exactly:
-   - `MX  10  mx1.titan.email`
-   - `MX  20  mx2.titan.email`
-   - `TXT  "v=spf1 include:spf.titan.email include:_spf.wpcloud.com ~all"`
-     (the `_spf.wpcloud.com` part can go once WordPress.com does)
-3. Configure `senanshaibaniculturalcenter.org` as the repository's GitHub
-   Pages custom domain, then apply the DNS records GitHub displays
-4. Confirm mail still sends **and** receives
-5. Only then consider cancelling hosting — keeping the registration and
-   mailbox until they have somewhere else to live
+Everything below must exist at the new DNS host before the nameservers are
+switched. The DKIM key in particular is easy to lose and silently breaks
+mail signing.
 
-`site/public/_redirects` preserves every URL the old site published, so
-existing citations and search results keep working. Add to it rather than
-removing from it.
+```
+A     @      185.199.108.153     ) GitHub Pages
+A     @      185.199.109.153     )
+A     @      185.199.110.153     )
+A     @      185.199.111.153     )
+CNAME www    senanlibrary.github.io
+MX    @      10 mx1.titan.email
+MX    @      20 mx2.titan.email
+TXT   @      "v=spf1 include:spf.titan.email include:_spf.wpcloud.com ~all"
+TXT   _dmarc "v=DMARC1;p=none;sp=none;adkim=r;aspf=r;pct=100"
+TXT   titan1._domainkey  "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDIbtnNeSgdpDyLZVFtN8/mLC7yJBr+AxsSL620m/UGAJG6lhnthdOR6TAD5+oS27lQOQYSDfMmscONQdTDLltWigb8htIcjXHO3TuHOER1QaNm98Gf+iVLIOT+MB8N2KcCtW8cKMjfxV32WiplGzVJ2aGGtynMifIjO0VDr97yWQIDAQAB"
+```
+
+Set the GitHub records to **DNS-only** (grey cloud) in Cloudflare, so GitHub
+can issue the TLS certificate.
+
+#### Order of operations
+
+Each stage is reversible, and mail keeps working throughout.
+
+1. **Add the zone to Cloudflare** and enter every record above. Change nothing
+   at WordPress.com yet.
+2. **Merge the `domain-cutover` branch.** It adds `site/public/CNAME` and
+   removes the `BASE_PATH` block, so the site builds for the root. Do this
+   *before* the nameserver switch: the `github.io` address will break, but the
+   live domain is still served by WordPress and nobody sees it.
+3. **Switch the nameservers** at WordPress.com to the two Cloudflare gives
+   you. Propagation is usually minutes.
+4. **Verify the site** on the real domain, and **send a test email** to
+   `contact@` to confirm Titan is still receiving.
+5. **Enable Cloudflare Email Routing** for `contact@`, forwarding to a real
+   inbox. This replaces the Titan MX records. Send another test and confirm it
+   arrives before going further.
+6. **Only then cancel the WordPress.com plan.** Keep the domain registration.
+
+#### After the cutover
+
+Forwarding is inbound only: replies will come from a personal address. To
+answer researchers as the institution, add `contact@` as a *send-as* identity
+in Gmail, which needs an SMTP relay. Worth doing before the site starts
+attracting enquiries.
+
+`site/public/_redirects` preserves every URL the old WordPress site published.
+It is a Cloudflare format and does nothing on GitHub Pages — if old links
+matter once the domain moves, either put Cloudflare in front of the site or
+convert those rules to redirect pages.
 
 ### Analytics
 
