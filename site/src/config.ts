@@ -65,6 +65,7 @@ export const nav = [
       label: g.title,
     })),
   },
+  { href: '/updates/', label: 'Updates' },
   { href: '/about/', label: 'About' },
   { href: '/visit/', label: 'Visit' },
 ] as const;

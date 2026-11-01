@@ -1,0 +1,45 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { url } from '../../lib/paths';
+import { formatDate } from '../../lib/updates';
+
+export async function getStaticPaths() {
+  // Imported inside: Astro hoists getStaticPaths into its own scope, where
+  // module-level bindings are not visible.
+  const { getUpdates } = await import('../../lib/updates');
+  const posts = await getUpdates();
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+
+<Base title={post.data.title} description={post.data.summary}>
+  <nav class="crumb" aria-label="Breadcrumb">
+    <a href={url('/updates/')}>Updates</a>
+  </nav>
+
+  <article>
+    <time datetime={post.data.date.toISOString()}>
+      {formatDate(post.data.date)}
+    </time>
+    <h1>{post.data.title}</h1>
+    <Content />
+  </article>
+</Base>
+
+<style>
+  .crumb { font-size: 0.85rem; margin-bottom: 2rem; }
+  .crumb a { color: var(--ink-muted); }
+
+  time {
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  h1 { margin: 0.4rem 0 1.5rem; }
+</style>

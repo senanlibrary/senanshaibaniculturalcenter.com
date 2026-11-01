@@ -16,4 +16,19 @@ const pages = defineCollection({
   }),
 });
 
-export const collections = { pages };
+/**
+ * News and announcements, one Markdown file per post in ../content/updates.
+ * A post with `draft: true` is hidden from the live site and the feed, and
+ * shows only in the local dev server.
+ */
+const updates = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: '../content/updates' }),
+  schema: z.object({
+    title: z.string(),
+    date: z.coerce.date(),
+    summary: z.string().optional(),
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = { pages, updates };

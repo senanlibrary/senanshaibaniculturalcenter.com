@@ -20,6 +20,41 @@ public_folder: /img
 publish_mode: simple
 
 collections:
+  - name: updates
+    label: Updates
+    label_singular: Update
+    folder: content/updates
+    create: true
+    slug: '{{fields.slug}}'
+    extension: md
+    format: frontmatter
+    identifier_field: title
+    summary: '{{title}} — {{date}}'
+    fields:
+      - { name: title, label: Title, widget: string }
+      - {
+          name: slug,
+          label: URL slug,
+          widget: string,
+          hint: 'Lowercase words separated by hyphens. Changing this changes the page address.',
+        }
+      - { name: date, label: Date, widget: datetime, time_format: false, date_format: 'YYYY-MM-DD' }
+      - {
+          name: summary,
+          label: Summary,
+          widget: text,
+          required: false,
+          hint: 'One sentence. Shown in the Updates list and the RSS feed.',
+        }
+      - {
+          name: draft,
+          label: Draft,
+          widget: boolean,
+          default: true,
+          hint: 'Leave on to keep the post off the live site. Turn off to publish.',
+        }
+      - { name: body, label: Content, widget: markdown }
+
   - name: pages
     label: Subject guides and pages
     label_singular: Page

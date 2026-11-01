@@ -1,0 +1,95 @@
+---
+import Base from '../../layouts/Base.astro';
+import { url } from '../../lib/paths';
+import { getUpdates, formatDate } from '../../lib/updates';
+
+const posts = await getUpdates();
+---
+
+<Base
+  title="Updates"
+  description="News from the center: visits, new cataloging, and events."
+>
+  <h1>Updates</h1>
+
+  <p class="lede">
+    News from the center, including visits, new cataloging, and events.
+  </p>
+
+  <p class="feed">
+    <a href={url('/updates/feed.xml')}>Subscribe by RSS</a>
+  </p>
+
+  {
+    posts.length === 0 ? (
+      <p>No updates have been posted yet.</p>
+    ) : (
+      <ul class="posts">
+        {posts.map((post) => (
+          <li>
+            <a href={url(`/updates/${post.id}/`)}>
+              <time datetime={post.data.date.toISOString()}>
+                {formatDate(post.data.date)}
+              </time>
+              <h2>
+                {post.data.title}
+                {post.data.draft && <span class="draft">Draft</span>}
+              </h2>
+              {post.data.summary && <p>{post.data.summary}</p>}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</Base>
+
+<style>
+  .feed { font-size: 0.92rem; color: var(--ink-muted); }
+
+  .posts {
+    list-style: none;
+    margin: 2.5rem 0 0;
+    padding: 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .posts li { border-bottom: 1px solid var(--rule-soft); }
+
+  .posts a {
+    display: grid;
+    gap: 0.3rem;
+    padding: 1.5rem 0;
+    text-decoration: none;
+  }
+
+  .posts time {
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .posts h2 {
+    font-size: 1.2rem;
+    margin: 0;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent);
+    text-underline-offset: 0.18em;
+  }
+
+  .posts a:hover h2 { color: var(--accent); text-decoration-color: var(--accent); }
+
+  .posts p { margin: 0; font-size: 0.95rem; color: var(--ink-muted); }
+
+  .draft {
+    margin-left: 0.7rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 0.1rem 0.4rem;
+    vertical-align: middle;
+  }
+</style>
