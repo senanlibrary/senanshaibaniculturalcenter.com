@@ -20,10 +20,10 @@ public_folder: /img
 publish_mode: simple
 
 collections:
-  - name: updates
-    label: Updates
-    label_singular: Update
-    folder: content/updates
+  - name: news
+    label: News
+    label_singular: News post
+    folder: content/news
     create: true
     slug: '{{fields.slug}}'
     extension: md
@@ -44,7 +44,7 @@ collections:
           label: Summary,
           widget: text,
           required: false,
-          hint: 'One sentence. Shown in the Updates list.',
+          hint: 'One sentence. Shown in the News list.',
         }
       - {
           name: draft,

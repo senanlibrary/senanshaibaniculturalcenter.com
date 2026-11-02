@@ -1,8 +1,8 @@
 import { getCollection } from 'astro:content';
 
-/** Published updates, newest first. Drafts appear only in the dev server. */
-export async function getUpdates() {
-  const all = await getCollection('updates');
+/** Published news posts, newest first. Drafts appear only in the dev server. */
+export async function getNews() {
+  const all = await getCollection('news');
   return all
     .filter((post) => import.meta.env.DEV || !post.data.draft)
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());

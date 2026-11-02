@@ -1,16 +1,16 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { url } from '../../lib/paths';
-import { getUpdates, formatDate } from '../../lib/updates';
+import { getNews, formatDate } from '../../lib/news';
 
-const posts = await getUpdates();
+const posts = await getNews();
 ---
 
 <Base
-  title="Updates"
+  title="News"
   description="News from the center: visits, new cataloging, and events."
 >
-  <h1>Updates</h1>
+  <h1>News</h1>
 
   <p class="lede">
     News from the center, including visits, new cataloging, and events.
@@ -18,12 +18,12 @@ const posts = await getUpdates();
 
   {
     posts.length === 0 ? (
-      <p>No updates have been posted yet.</p>
+      <p>No news has been posted yet.</p>
     ) : (
       <ul class="posts">
         {posts.map((post) => (
           <li>
-            <a href={url(`/updates/${post.id}/`)}>
+            <a href={url(`/news/${post.id}/`)}>
               <time datetime={post.data.date.toISOString()}>
                 {formatDate(post.data.date)}
               </time>

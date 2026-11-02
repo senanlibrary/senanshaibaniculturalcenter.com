@@ -2,13 +2,13 @@
 import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import { url } from '../../lib/paths';
-import { formatDate } from '../../lib/updates';
+import { formatDate } from '../../lib/news';
 
 export async function getStaticPaths() {
   // Imported inside: Astro hoists getStaticPaths into its own scope, where
   // module-level bindings are not visible.
-  const { getUpdates } = await import('../../lib/updates');
-  const posts = await getUpdates();
+  const { getNews } = await import('../../lib/news');
+  const posts = await getNews();
   return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
 }
 
@@ -18,7 +18,7 @@ const { Content } = await render(post);
 
 <Base title={post.data.title} description={post.data.summary}>
   <nav class="crumb" aria-label="Breadcrumb">
-    <a href={url('/updates/')}>Updates</a>
+    <a href={url('/news/')}>News</a>
   </nav>
 
   <article>

@@ -14,3 +14,8 @@
 /collections/serials/                   /guides/serials/                               301
 /collections/journalism-in-the-arab-world/  /guides/journalism-in-the-arab-world/      301
 /collections/women-in-the-arab-world/   /guides/women-in-the-arab-world/               301
+
+# The News section was first published as Updates.
+/updates/                                   /news/                                         301
+/updates/musawi-el-ariss-visit/             /news/musawi-el-ariss-visit/                   301
+/updates/poetic-desire-literary-thievery/   /news/poetic-desire-literary-thievery/         301
