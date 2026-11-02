@@ -16,10 +16,6 @@ const posts = await getUpdates();
     News from the center, including visits, new cataloging, and events.
   </p>
 
-  <p class="feed">
-    <a href={url('/updates/feed.xml')}>Subscribe by RSS</a>
-  </p>
-
   {
     posts.length === 0 ? (
       <p>No updates have been posted yet.</p>
@@ -45,8 +41,6 @@ const posts = await getUpdates();
 </Base>
 
 <style>
-  .feed { font-size: 0.92rem; color: var(--ink-muted); }
-
   .posts {
     list-style: none;
     margin: 2.5rem 0 0;

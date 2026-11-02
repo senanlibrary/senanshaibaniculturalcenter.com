@@ -26,12 +26,6 @@ const path = Astro.url.pathname;
     <meta name="description" content={description} />
     <link rel="canonical" href={new URL(path, Astro.site ?? site.url)} />
     <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
-    <link
-      rel="alternate"
-      type="application/rss+xml"
-      title={`${site.name} — Updates`}
-      href={url('/updates/feed.xml')}
-    />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
